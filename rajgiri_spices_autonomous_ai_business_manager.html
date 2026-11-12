@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rajgiri Spices — Autonomous AI Business Manager</title>
+
+  <!-- Fonts: Plus Jakarta Sans, Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#09090b',
+              900: '#0f1015',
+              850: '#14161d',
+              800: '#1a1d26',
+              700: '#252936',
+            },
+            saffron: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            },
+            chilli: {
+              500: '#ef4444',
+              600: '#dc2626',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Chart.js & Lucide Icons CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-app: #09090b;
+      --bg-surface: #111217;
+      --bg-elevated: #181a22;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.15);
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent: #f59e0b;
+    }
+
+    html:not(.dark) {
+      --bg-app: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --border-subtle: rgba(15, 23, 42, 0.08);
+      --border-strong: rgba(15, 23, 42, 0.16);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent: #d97706;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .glass-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.875rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .glass-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .elevated-box {
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.45);
+    }
+
+    /* Subtle pulse for active AI indicator */
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+    .ai-dot {
+      animation: subtlePulse 2.4s infinite ease-in-out;
+    }
+
+    /* Demo Spotlight Ring */
+    .demo-highlight {
+      outline: 2px solid #f59e0b !important;
+      outline-offset: 4px;
+      border-radius: 0.875rem;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-500/20 selection:text-amber-400">
+
+  <!-- MOBILE SIDEBAR BACKDROP -->
+  <div id="sidebarBackdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+
+  <div class="flex min-h-screen">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-68 max-w-[272px] flex-shrink-0 flex flex-col border-r transition-transform duration-200 -translate-x-full lg:translate-x-0" style="background-color: var(--bg-surface); border-color: var(--border-subtle);">
+      <!-- Brand Header -->
+      <div class="p-4 border-b flex items-center justify-between" style="border-color: var(--border-subtle);">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 flex items-center justify-center text-white font-display font-bold shadow-sm">
+            RS
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-display font-bold text-sm tracking-tight">Rajgiri Spices</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">AI OS</span>
+            </div>
+            <p class="text-[11px]" style="color: var(--text-muted);">Autonomous Business Mgr</p>
+          </div>
+        </div>
+        <button onclick="toggleMobileSidebar(false)" class="lg:hidden p-1.5 rounded-lg hover:bg-zinc-500/10">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Status Pill -->
+      <div class="px-4 pt-3 pb-1">
+        <div class="px-3 py-2 rounded-lg text-xs flex items-center justify-between border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+          <span class="flex items-center gap-2 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 ai-dot"></span>
+            Co-Pilot Active
+          </span>
+          <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">DEMO DATA</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav id="navList" class="flex-1 overflow-y-auto px-3 py-3 space-y-1 text-[13px]">
+        <!-- Populated dynamically by JS -->
+      </nav>
+
+      <!-- Bottom Owner Security Guardrail Card -->
+      <div class="p-3 border-t" style="border-color: var(--border-subtle);">
+        <div class="p-3 rounded-xl border text-xs space-y-1.5" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+          <div class="flex items-center justify-between font-semibold">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              Human-in-the-Loop
+            </span>
+            <span id="sidebarApprovalCount" class="font-mono text-[11px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400">0</span>
+          </div>
+          <p class="text-[11px] leading-relaxed" style="color: var(--text-muted);">
+            AI prepares quotes, POs &amp; campaigns. Zero funds or external messages execute without owner approval.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT SHELL -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- TOP HEADER BAR -->
+      <header class="sticky top-0 z-20 backdrop-blur-md border-b px-4 sm:px-6 py-3" style="background-color: color-mix(in srgb, var(--bg-app) 86%, transparent); border-color: var(--border-subtle);">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <!-- Left: Mobile Menu & Breadcrumb -->
+          <div class="flex items-center gap-3">
+            <button onclick="toggleMobileSidebar(true)" class="lg:hidden p-2 rounded-lg border hover:bg-zinc-500/10" style="border-color: var(--border-subtle);">
+              <i data-lucide="menu" class="w-4 h-4"></i>
+            </button>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 id="pageTitle" class="font-display font-bold text-base sm:text-lg tracking-tight">Executive Overview</h1>
+                <span class="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/25">
+                  ILLUSTRATIVE DEMO DATA
+                </span>
+              </div>
+              <p id="pageSubtitle" class="text-xs hidden sm:block" style="color: var(--text-muted);">Panipat, Haryana Plant &bull; Real-time Simulated Operations</p>
+            </div>
+          </div>
+
+          <!-- Right: Actions -->
+          <div class="flex items-center gap-2 sm:gap-2.5">
+            <!-- Guided Demo Button -->
+            <button onclick="startGuidedDemo()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-zinc-950 shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+              <span>Start Business Demo</span>
+            </button>
+
+            <!-- Approval Queue Shortcut -->
+            <button onclick="navigateTo('tasks')" class="relative px-2.5 py-2 rounded-lg border text-xs font-medium flex items-center gap-1.5 hover:bg-zinc-500/10 transition cursor-pointer" style="border-color: var(--border-subtle);" title="Owner Approval Queue">
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span class="hidden md:inline">Approvals</span>
+              <span id="headerApprovalBadge" class="font-mono text-[11px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-400 font-semibold">0</span>
+            </button>
+
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="p-2 rounded-lg border hover:bg-zinc-500/10 transition cursor-pointer" style="border-color: var(--border-subtle);" title="Toggle Light/Dark Theme">
+              <i id="themeIcon" data-lucide="sun" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Reset Demo Data -->
+            <button onclick="confirmResetDemo()" class="px-2.5 py-2 rounded-lg border text-xs font-medium hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition flex items-center gap-1.5 cursor-pointer" style="border-color: var(--border-subtle);" title="Reset all sample data to default">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span class="hidden xl:inline">Reset Demo</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN DYNAMIC WORKSPACE -->
+      <main id="mainWorkspace" class="flex-1 p-4 sm:p-6 max-w-[1600px] w-full mx-auto space-y-6">
+        <!-- Rendered dynamically per active module -->
+      </main>
+    </div>
+  </div>
+
+  <!-- FLOATING 10-STEP GUIDED BUSINESS DEMO BAR -->
+  <div id="guidedDemoBar" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3xl hidden">
+    <div class="rounded-2xl border border-amber-500/40 shadow-2xl p-4 backdrop-blur-xl" style="background-color: color-mix(in srgb, var(--bg-surface) 94%, #f59e0b 6%);">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="space-y-1 flex-1">
+          <div class="flex items-center gap-2">
+            <span id="demoStepBadge" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500 text-zinc-950">STEP 1 OF 10</span>
+            <span id="demoStepTitle" class="font-display font-bold text-sm">AI Identifies Hotel &amp; Restaurant Buyers</span>
+          </div>
+          <p id="demoStepDesc" class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+            Watch how Rajgiri AI scans regional hospitality targets and prioritizes high-volume bulk masala buyers.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+          <button onclick="prevDemoStep()" id="demoPrevBtn" class="px-3 py-1.5 rounded-lg border text-xs font-medium hover:bg-zinc-500/10 disabled:opacity-40 cursor-pointer" style="border-color: var(--border-subtle);">Prev</button>
+          <button onclick="nextDemoStep()" id="demoNextBtn" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold cursor-pointer">Next Step &rarr;</button>
+          <button onclick="endGuidedDemo()" class="p-1.5 rounded-lg hover:bg-zinc-500/10 text-xs cursor-pointer" title="Exit Guided Tour">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Progress Bar -->
+      <div class="mt-3 w-full h-1.5 rounded-full overflow-hidden bg-zinc-700/40">
+        <div id="demoProgressBar" class="h-full bg-amber-500 transition-all duration-300" style="width: 10%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL MODAL CONTAINER -->
+  <div id="modalOverlay" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div id="modalBox" class="w-full max-w-xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style="background-color: var(--bg-surface); border-color: var(--border-strong);">
+      <div class="px-5 py-4 border-b flex items-center justify-between" style="border-color: var(--border-subtle);">
+        <h3 id="modalTitle" class="font-display font-bold text-base">Modal Title</h3>
+        <button onclick="closeModal()" class="p-1.5 rounded-lg hover:bg-zinc-500/10 cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="modalBody" class="p-5 overflow-y-auto space-y-4 text-sm">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed top-16 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- APPLICATION JAVASCRIPT -->
+  <script>
+    /*************************************************************************
+     * 1. STATE MANAGEMENT & INITIAL ILLUSTRATIVE DEMO DATA
+     *************************************************************************/
+    const STORAGE_KEY = 'rajgiri_spices_os_v1';
+
+    const DEFAULT_STATE = {
+      theme: 'dark',
+      activeTab: 'dashboard',
+      leads: [
+        { id: 'LD-101', name: 'Hotel Noor Mahal Palace (Illustrative)', category: 'Hotels', city: 'Karnal', state: 'Haryana', contact: 'Purchase Desk • +91 98120-XXXXX (Demo)', demandKg: 280, status: 'Qualified', followUp: '2026-11-14', score: 94, notes: 'Requires monthly supply of Kashmiri Chilli, Turmeric & Garam Masala in 10kg HoReCa packs.' },
+        { id: 'LD-102', name: 'Sethi Dhaba & Highway Banquet (Illustrative)', category: 'Dhabas', city: 'Panipat', state: 'Haryana', contact: 'Rakesh Sethi • +91 94160-XXXXX (Demo)', demandKg: 420, status: 'Proposal Sent', followUp: '2026-11-13', score: 91, notes: 'High daily consumption of Red Chilli Powder, Coriander Powder & Kitchen King.' },
+        { id: 'LD-103', name: 'Royal Tandoor & Catering Co. (Illustrative)', category: 'Caterers', city: 'Gurugram', state: 'Haryana', contact: 'Chef Malhotra • +91 98111-XXXXX (Demo)', demandKg: 350, status: 'New Lead', followUp: '2026-11-15', score: 88, notes: 'Wedding season peak demand; requested 1kg sample kit for tasting.' },
+        { id: 'LD-104', name: 'Bikaner Sweet & Namkeen House (Illustrative)', category: 'Sweet shops', city: 'Sonipat', state: 'Haryana', contact: 'Procurement • +91 98960-XXXXX (Demo)', demandKg: 190, status: 'Negotiation', followUp: '2026-11-13', score: 85, notes: 'Needs bulk Cumin, Black Pepper & Dry Ginger powder for namkeen unit.' },
+        { id: 'LD-105', name: 'FreshMart Superstore Chain (Illustrative)', category: 'Supermarkets', city: 'Chandigarh', state: 'Chandigarh', contact: 'Category Buyer • +91 98765-XXXXX (Demo)', demandKg: 500, status: 'New Lead', followUp: '2026-11-16', score: 96, notes: 'Interested in 100g & 200g retail pouch shelf placement across 6 stores.' },
+        { id: 'LD-106', name: 'Annapurna Institutional Foods (Illustrative)', category: 'Food manufacturers', city: 'Ambala', state: 'Haryana', contact: 'Plant Ops • +91 94660-XXXXX (Demo)', demandKg: 650, status: 'Qualified', followUp: '2026-11-14', score: 92, notes: 'Industrial canteen contractor looking for quarterly rate contract.' }
+      ],
+      suppliers: [
+        { id: 'SUP-01', name: 'Guntur Mirchi Mandi Traders (Illustrative)', spice: 'Whole Red Chilli (Teja S17)', location: 'Guntur, Andhra Pradesh', availableKg: 12000, indicativePrice: 182, moqKg: 500, quality: 'ASTA 110+ Color • <10% Moisture', rating: 4.8 },
+        { id: 'SUP-02', name: 'Byadgi Agro Spice Exports (Illustrative)', spice: 'Whole Red Chilli (Byadgi)', location: 'Haveri, Karnataka', availableKg: 8500, indicativePrice: 215, moqKg: 300, quality: 'High Oleoresin • Deep Red Color', rating: 4.9 },
+        { id: 'SUP-03', name: 'Nizamabad Haldi Farmers Co-op (Illustrative)', spice: 'Turmeric Fingers (Salem/Nizamabad)', location: 'Nizamabad, Telangana', availableKg: 15000, indicativePrice: 146, moqKg: 500, quality: 'Curcumin 4.2% • Double Polished', rating: 4.7 },
+        { id: 'SUP-04', name: 'Erode Golden Turmeric Mart (Illustrative)', spice: 'Turmeric Fingers (Erode Bold)', location: 'Erode, Tamil Nadu', availableKg: 9000, indicativePrice: 158, moqKg: 400, quality: 'Curcumin 4.6% • Export Grade', rating: 4.9 },
+        { id: 'SUP-05', name: 'Ramganj Mandi Dhaniya Corp (Illustrative)', spice: 'Coriander Seeds (Eagle/Scooter)', location: 'Kota, Rajasthan', availableKg: 18000, indicativePrice: 92, moqKg: 500, quality: 'Green Parrot Hue • 99% Machine Clean', rating: 4.6 },
+        { id: 'SUP-06', name: 'Unjha Jeera Wholesale Hub (Illustrative)', spice: 'Cumin Seeds (Bold Sortex)', location: 'Unjha, Gujarat', availableKg: 10000, indicativePrice: 268, moqKg: 250, quality: '99.5% Purity • High Essential Oil', rating: 4.8 },
+        { id: 'SUP-07', name: 'Idukki Malabar Pepper Estate (Illustrative)', spice: 'Black Pepper (550 GL)', location: 'Idukki, Kerala', availableKg: 4000, indicativePrice: 615, moqKg: 100, quality: 'Bold 4.75mm • Garbled', rating: 4.9 }
+      ],
+      purchaseHistory: [
+        { id: 'PO-891', date: '2026-10-28', supplier: 'Nizamabad Haldi Farmers Co-op', item: 'Turmeric Fingers', qtyKg: 1000, rate: 145, total: 145000, status: 'Received & Inspected' },
+        { id: 'PO-892', date: '2026-11-02', supplier: 'Guntur Mirchi Mandi Traders', item: 'Whole Red Chilli (Teja S17)', qtyKg: 800, rate: 180, total: 144000, status: 'Received & Inspected' },
+        { id: 'PO-893', date: '2026-11-07', supplier: 'Ramganj Mandi Dhaniya Corp', item: 'Coriander Seeds', qtyKg: 1200, rate: 91, total: 109200, status: 'In Transit' }
+      ],
+      rawInventory: [
+        { id: 'RAW-01', name: 'Whole Red Chilli (Teja)', stockKg: 640, minStockKg: 300, avgCostPerKg: 182 },
+        { id: 'RAW-02', name: 'Turmeric Fingers (Polished)', stockKg: 820, minStockKg: 350, avgCostPerKg: 146 },
+        { id: 'RAW-03', name: 'Coriander Seeds (Clean)', stockKg: 910, minStockKg: 400, avgCostPerKg: 92 },
+        { id: 'RAW-04', name: 'Cumin Seeds (Sortex)', stockKg: 210, minStockKg: 250, avgCostPerKg: 268 },
+        { id: 'RAW-05', name: 'Black Pepper & Whole Garam', stockKg: 145, minStockKg: 120, avgCostPerKg: 540 }
+      ],
+      finishedInventory: [
+        { id: 'FIN-01', name: 'Rajgiri Red Chilli Powder', sku: 'RS-RC-1KG', stockKg: 410, minStockKg: 200, costPerKg: 218, sellingPricePerKg: 295, marginPct: 26.1 },
+        { id: 'FIN-02', name: 'Rajgiri Salem Turmeric Powder', sku: 'RS-TP-1KG', stockKg: 520, minStockKg: 250, costPerKg: 174, sellingPricePerKg: 245, marginPct: 29.0 },
+        { id: 'FIN-03', name: 'Rajgiri Coriander Powder', sku: 'RS-CP-1KG', stockKg: 480, minStockKg: 200, costPerKg: 118, sellingPricePerKg: 168, marginPct: 29.8 },
+        { id: 'FIN-04', name: 'Rajgiri Roasted Cumin Powder', sku: 'RS-CM-500G', stockKg: 135, minStockKg: 150, costPerKg: 312, sellingPricePerKg: 420, marginPct: 25.7 },
+        { id: 'FIN-05', name: 'Rajgiri Shahi Garam Masala', sku: 'RS-GM-500G', stockKg: 190, minStockKg: 120, costPerKg: 445, sellingPricePerKg: 640, marginPct: 30.5 }
+      ],
+      batches: [
+        { id: 'BCH-204', date: '2026-11-10', product: 'Rajgiri Red Chilli Powder', rawUsed: 'Whole Red Chilli (Teja)', inputKg: 300, wastagePct: 6, outputKg: 282, packagingCost: 4200, processingCost: 3600, totalCost: 62400, costPerKg: 221.28, stage: 'Finished Goods Inventory' },
+        { id: 'BCH-205', date: '2026-11-11', product: 'Rajgiri Salem Turmeric Powder', rawUsed: 'Turmeric Fingers (Polished)', inputKg: 400, wastagePct: 4.5, outputKg: 382, packagingCost: 4800, processingCost: 4100, totalCost: 67300, costPerKg: 176.18, stage: 'Packaging' }
+      ],
+      customers: [
+        { id: 'CUST-01', name: 'Haveli Heritage Resorts (Demo)', type: 'Hotel Chain', city: 'Karnal, HR', phone: '+91 98120-11223', totalOrders: 14, totalSpent: 342000, outstanding: 42000, lastOrder: '2026-11-08', followUp: '2026-11-14' },
+        { id: 'CUST-02', name: 'Shree Balaji Kirana & Wholesale (Demo)', type: 'Wholesaler', city: 'Panipat, HR', phone: '+91 98961-44556', totalOrders: 22, totalSpent: 518000, outstanding: 0, lastOrder: '2026-11-10', followUp: '2026-11-18' },
+        { id: 'CUST-03', name: 'Grand Oberoi Caterers (Demo)', type: 'Caterer', city: 'Delhi NCR', phone: '+91 98100-77889', totalOrders: 9, totalSpent: 215000, outstanding: 64500, lastOrder: '2026-11-05', followUp: '2026-11-13' },
+        { id: 'CUST-04', name: 'Apna Bazar Retail Mart (Demo)', type: 'Supermarket', city: 'Rohtak, HR', phone: '+91 94162-99001', totalOrders: 11, totalSpent: 276000, outstanding: 18500, lastOrder: '2026-11-09', followUp: '2026-11-15' }
+      ],
+      orders: [
+        { id: 'ORD-501', customer: 'Haveli Heritage Resorts (Demo)', product: 'Rajgiri Shahi Garam Masala', qtyKg: 80, rate: 640, amount: 51200, status: 'Processing', payment: 'Pending', date: '2026-11-11' },
+        { id: 'ORD-502', customer: 'Shree Balaji Kirana & Wholesale (Demo)', product: 'Rajgiri Red Chilli Powder', qtyKg: 250, rate: 285, amount: 71250, status: 'Dispatched', payment: 'Paid', date: '2026-11-10' },
+        { id: 'ORD-503', customer: 'Grand Oberoi Caterers (Demo)', product: 'Rajgiri Salem Turmeric Powder', qtyKg: 200, rate: 240, amount: 48000, status: 'Pending Dispatch', payment: 'Partial', date: '2026-11-12' },
+        { id: 'ORD-504', customer: 'Apna Bazar Retail Mart (Demo)', product: 'Rajgiri Coriander Powder', qtyKg: 150, rate: 165, amount: 24750, status: 'Delivered', payment: 'Paid', date: '2026-11-08' }
+      ],
+      distributors: [
+        { id: 'DIST-01', name: 'Mittal FMCG Distributors (Illustrative)', city: 'Ambala', state: 'Haryana', contact: 'Suresh Mittal • +91 98121-XXXXX', status: 'Active Partner', marginOffered: '14% + 2% Slab Bonus', monthlyVolumeKg: 1450, performance: '96% On-Time Target', notes: 'Covers 110 retail kirana stores in Ambala Cantt & City.' },
+        { id: 'DIST-02', name: 'Kamboj Agro & Spice Agencies (Illustrative)', city: 'Hisar', state: 'Haryana', contact: 'Vikram Kamboj • +91 94161-XXXXX', status: 'Proposal Sent', marginOffered: '15% Distributor Margin', monthlyVolumeKg: 900, performance: 'Onboarding Phase', notes: 'Strong HoReCa network across Hisar & Sirsa.' },
+        { id: 'DIST-03', name: 'Doon Valley Provisions (Illustrative)', city: 'Dehradun', state: 'Uttarakhand', contact: 'Amit Rawat • +91 98370-XXXXX', status: 'Enquiry', marginOffered: '15% + Freight Share', monthlyVolumeKg: 1100, performance: 'Evaluating Samples', notes: 'Requested exclusive territory rights for Dehradun & Rishikesh.' }
+      ],
+      finance: {
+        monthlyRevenue: 1485000,
+        rawMaterialExpense: 785000,
+        labourExpense: 142000,
+        electricityProductionExpense: 68000,
+        packagingExpense: 84000,
+        transportationExpense: 59000,
+        marketingExpense: 38000,
+        otherOperatingExpense: 47000
+      },
+      marketingPosts: [
+        { id: 'MKT-01', date: '2026-11-14', platform: 'Instagram Reel', title: 'Cold-Grinding Technology: Why Rajgiri Chilli Retains 100% Natural Oils', status: 'Draft Ready', caption: 'Heat destroys aroma. At Rajgiri Spices, our low-temperature cryogenic grinding locks in natural volatile oils and vibrant crimson color. Pure spice, zero fillers. #RajgiriSpices #PureMasalas #IndianSpices #ChefChoice' },
+        { id: 'MKT-02', date: '2026-11-16', platform: 'Instagram Carousel', title: '5 Signs Your Kitchen Turmeric Has Artificial Lead Chromate', status: 'Scheduled (Manual)', caption: 'Know what goes into your family’s daily tadka. Swipe to test purity at home in 30 seconds. Lab-tested Salem Turmeric with 4.5%+ Curcumin. #CleanFoodIndia #TurmericPurity #Rajgiri' },
+        { id: 'MKT-03', date: '2026-11-19', platform: 'WhatsApp & LinkedIn B2B', title: 'HoReCa Bulk Supply Offer: Direct Mill-to-Kitchen Pricing for Caterers', status: 'Awaiting Approval', caption: 'Attention Banquet Chefs & Caterers in Haryana & NCR: Cut spice procurement costs by up to 14% with direct factory packs (5kg & 25kg). Request a free sample box today.' }
+      ],
+      opportunities: [
+        { id: 'OPP-01', title: 'Haryana Highway HoReCa Cluster Contract', category: 'Hotels & Dhabas', score: 95, estimatedMonthlyRevenue: 380000, effort: 'Medium', steps: '1. Send 5-spice HoReCa tasting kit to 25 NH-44 dhabas & hotels between Panipat and Ambala.\n2. Offer 15-day credit cycle for orders above 150kg.\n3. Lock quarterly fixed-rate supply agreements.' },
+        { id: 'OPP-02', title: 'Private-Label Masala Packaging for Regional Supermarkets', category: 'Private-Label', score: 89, estimatedMonthlyRevenue: 450000, effort: 'High', steps: '1. Pitch white-label 100g/200g pouch packing to 4 regional supermarket chains in Chandigarh & Gurugram.\n2. Utilize 30% idle evening grinding & FFS pouch packing capacity.' },
+        { id: 'OPP-03', title: 'Wedding Season Bulk Caterer Pack (Oct–Feb Peak)', category: 'Bulk Buyers', score: 92, estimatedMonthlyRevenue: 290000, effort: 'Low', steps: '1. Launch "Shahi Shaadi Pack" (5kg Shahi Garam Masala + 25kg Chilli + 25kg Turmeric + 25kg Coriander).\n2. Target 60 wedding caterers in Delhi NCR & Sonipat.' },
+        { id: 'OPP-04', title: 'West UP Distributor Expansion (Meerut & Ghaziabad)', category: 'New Geography', score: 84, estimatedMonthlyRevenue: 310000, effort: 'Medium', steps: '1. Appoint 2 super-stockists in Meerut and Ghaziabad.\n2. Run introductory retailer display scheme (1 free 500g pack on 10kg order).' }
+      ],
+      tasks: [
+        { id: 'TSK-01', title: 'Call Hotel Noor Mahal Purchase Manager for 280kg monthly quote', priority: 'High', deadline: '2026-11-13', completed: false, source: 'AI Recommendation' },
+        { id: 'TSK-02', title: 'Restock Cumin Seeds (Current: 210kg, below 250kg threshold)', priority: 'High', deadline: '2026-11-14', completed: false, source: 'Low-Stock Automation' },
+        { id: 'TSK-03', title: 'Collect ₹64,500 pending balance from Grand Oberoi Caterers', priority: 'Medium', deadline: '2026-11-13', completed: false, source: 'Payment Alert' },
+        { id: 'TSK-04', title: 'Approve Quality Lab Report for Batch #BCH-205 Turmeric', priority: 'Low', deadline: '2026-11-12', completed: true, source: 'Production Ops' }
+      ],
+      approvals: [
+        { id: 'APR-01', type: 'Purchase Order Draft', title: 'PO Draft: 500kg Unjha Sortex Cumin Seeds @ ₹268/kg', amount: '₹1,34,000', reason: 'Cumin stock (210kg) fell below safety threshold (250kg). Unjha spot prices projected to rise 4% next week.', status: 'Pending', createdAt: '18 mins ago' },
+        { id: 'APR-02', type: 'Customer Quotation', title: 'Bulk Quote: Sethi Dhaba & Highway Banquet (420kg/mo)', amount: '₹98,400', reason: 'Prepared HoReCa Tier-1 pricing with 28.4% blended gross margin. Ready for owner sign-off before sending.', status: 'Pending', createdAt: '1 hour ago' },
+        { id: 'APR-03', type: 'Marketing Campaign', title: 'HoReCa Wedding Season WhatsApp & Sample Kit Outreach', amount: '₹12,500 (Sample Budget)', reason: 'Targets 40 verified caterers in Panipat, Karnal & Sonipat ahead of peak November–December banquet bookings.', status: 'Pending', createdAt: '3 hours ago' }
+      ],
+      chatHistory: [
+        {
+          sender: 'ai',
+          time: '09:30 AM',
+          text: `Namaste! I am your **Rajgiri Spices AI Business Manager** *(Simulated AI Co-Pilot)*.\n\nHere is your executive pulse for today:\n• **Net Margin Health:** Estimated net profit stands at **₹2,62,000 (17.6%)** on ₹14.85L monthly run-rate.\n• **Urgent Action:** Raw Cumin Seed stock is at **210 kg** (below your 250 kg safety buffer). I have drafted a Purchase Order for 500 kg in your Approval Queue.\n• **Growth Opportunity:** 6 high-intent HoReCa & wholesale leads in Haryana need follow-up this week.\n\nClick any command below or ask me to analyze margins, compare suppliers, or draft quotations.`
+        }
+      ],
+      automations: [
+        { id: 'AUT-01', name: 'Daily 8:30 AM Owner Executive Briefing', desc: 'Compiles yesterday’s dispatch, cash collected, stock levels & priority follow-ups.', active: true, lastRun: 'Today, 08:30 AM' },
+        { id: 'AUT-02', name: 'Raw Material Low-Stock & Mandi Price Watch', desc: 'Triggers reorder draft when any spice drops below safety kg or mandi prices dip.', active: true, lastRun: '2 hours ago' },
+        { id: 'AUT-03', name: 'HoReCa & Bulk Lead Follow-Up Nudges', desc: 'Flags quotes older than 48 hours without customer response.', active: true, lastRun: 'Today, 10:00 AM' },
+        { id: 'AUT-04', name: 'Overdue Receivable Reminder Drafts', desc: 'Prepares polite payment reminder notes for invoices past due date (requires approval).', active: true, lastRun: 'Yesterday, 05:00 PM' }
+      ]
+    };
+
+    let appState = loadState();
+    let activeCharts = [];
+    let demoTourIndex = -1;
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          return { ...structuredClone(DEFAULT_STATE), ...JSON.parse(saved) };
+        }
+      } catch (e) {
+        console.warn('State load fallback:', e);
+      }
+      return structuredClone(DEFAULT_STATE);
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.warn('Could not persist state:', e);
+      }
+      updateGlobalBadges();
+    }
+
+    function confirmResetDemo() {
+      openModal('Reset Demo Environment', `
+        <p style="color: var(--text-secondary);">This will restore all illustrative sample leads, suppliers, inventory batches, financial figures, and AI approval items back to the clean Rajgiri Spices demonstration baseline.</p>
+        <div class="flex justify-end gap-2 pt-3">
+          <button onclick="closeModal()" class="px-4 py-2 rounded-lg border text-xs font-medium cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+          <button onclick="resetDemoNow()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold cursor-pointer">Restore Default Demo Data</button>
+        </div>
+      `);
+    }
+
+    function resetDemoNow() {
+      localStorage.removeItem(STORAGE_KEY);
+      appState = structuredClone(DEFAULT_STATE);
+      applyTheme();
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Demo data restored to original baseline.', 'success');
+    }
+
+    /*************************************************************************
+     * 2. NAVIGATION & THEME SYSTEM
+     *************************************************************************/
+    const NAV_ITEMS = [
+      { id: 'dashboard', label: 'Executive Dashboard', icon: 'layout-dashboard', subtitle: 'Panipat, Haryana Plant • Business Pulse & AI Insights' },
+      { id: 'ai-manager', label: 'AI Business Manager', icon: 'bot', subtitle: 'Central Autonomous Co-Pilot • Simulated Business Intelligence' },
+      { id: 'leads', label: 'Customer & Bulk Finder', icon: 'users', subtitle: 'HoReCa, Retail & Wholesale Lead Discovery Engine' },
+      { id: 'suppliers', label: 'Raw Material & Suppliers', icon: 'sprout', subtitle: 'Mandi Sourcing, Price Comparison & Procurement' },
+      { id: 'manufacturing', label: 'Manufacturing & Stock', icon: 'factory', subtitle: '9-Stage Masala Processing, Batch Costing & Inventory' },
+      { id: 'crm', label: 'Sales & Customer CRM', icon: 'shopping-bag', subtitle: 'Bulk Orders, Quotations, Receivables & Follow-Ups' },
+      { id: 'distributors', label: 'Distributor Network', icon: 'truck', subtitle: 'Regional Super-Stockists, Territory & Margin Tracking' },
+      { id: 'finance', label: 'Finance & Profitability', icon: 'indian-rupee', subtitle: 'P&L Breakdown, Unit Economics & Break-Even Simulator' },
+      { id: 'marketing', label: 'Marketing Manager', icon: 'megaphone', subtitle: 'Content Calendar, Reel Ideas & B2B Campaigns' },
+      { id: 'opportunities', label: 'Opportunity Finder', icon: 'sparkles', subtitle: 'AI-Detected Growth Vectors & Institutional Contracts' },
+      { id: 'tasks', label: 'Tasks, Automation & Approvals', icon: 'shield-check', subtitle: 'Owner Security Vault, Workflows & Daily Action Plan' }
+    ];
+
+    function navigateTo(tabId) {
+      appState.activeTab = tabId;
+      saveState();
+      toggleMobileSidebar(false);
+      renderApp();
+    }
+
+    function toggleTheme() {
+      appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveState();
+      renderApp();
+    }
+
+    function applyTheme() {
+      const html = document.documentElement;
+      if (appState.theme === 'dark') {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+      const iconEl = document.getElementById('themeIcon');
+      if (iconEl) {
+        iconEl.setAttribute('data-lucide', appState.theme === 'dark' ? 'sun' : 'moon');
+      }
+    }
+
+    function toggleMobileSidebar(show) {
+      const sb = document.getElementById('sidebar');
+      const bd = document.getElementById('sidebarBackdrop');
+      if (show) {
+        sb.classList.remove('-translate-x-full');
+        bd.classList.remove('hidden');
+      } else {
+        sb.classList.add('-translate-x-full');
+        bd.classList.add('hidden');
+      }
+    }
+
+    function updateGlobalBadges() {
+      const pendingApprovals = appState.approvals.filter(a => a.status === 'Pending').length;
+      const b1 = document.getElementById('headerApprovalBadge');
+      const b2 = document.getElementById('sidebarApprovalCount');
+      if (b1) b1.textContent = pendingApprovals;
+      if (b2) b2.textContent = pendingApprovals;
+    }
+
+    function destroyCharts() {
+      activeCharts.forEach(c => {
+        try { c.destroy(); } catch (e) {}
+      });
+      activeCharts = [];
+    }
+
+    /*************************************************************************
+     * 3. UTILITY HELPERS (CURRENCY, TOASTS, MODALS, GOOGLE SEARCH)
+     *************************************************************************/
+    function formatINR(num) {
+      return '₹' + Math.round(Number(num) || 0).toLocaleString('en-IN');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        success: 'border-emerald-500/40 bg-emerald-950/90 text-emerald-200',
+        warning: 'border-amber-500/40 bg-amber-950/90 text-amber-200',
+        info: 'border-blue-500/40 bg-zinc-900/95 text-zinc-100'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs font-medium flex items-center justify-between gap-3 transition-all ${colors[type] || colors.info}`;
+      el.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100">&times;</button>`;
+      container.appendChild(el);
+      setTimeout(() => { if (el.parentElement) el.remove(); }, 4200);
+    }
+
+    function openModal(title, bodyHTML) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = bodyHTML;
+      const overlay = document.getElementById('modalOverlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById('modalOverlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }
+
+    function googleSearchURL(query) {
+      return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+    }
+
+    /*************************************************************************
+     * 4. FINANCIAL CALCULATIONS HELPER
+     *************************************************************************/
+    function getFinanceMetrics() {
+      const f = appState.finance;
+      const totalExpenses =
+        Number(f.rawMaterialExpense) +
+        Number(f.labourExpense) +
+        Number(f.electricityProductionExpense) +
+        Number(f.packagingExpense) +
+        Number(f.transportationExpense) +
+        Number(f.marketingExpense) +
+        Number(f.otherOperatingExpense);
+      const grossProfit = Number(f.monthlyRevenue) - (Number(f.rawMaterialExpense) + Number(f.packagingExpense) + Number(f.electricityProductionExpense));
+      const netProfit = Number(f.monthlyRevenue) - totalExpenses;
+      const netMarginPct = f.monthlyRevenue > 0 ? ((netProfit / f.monthlyRevenue) * 100).toFixed(1) : '0.0';
+      const grossMarginPct = f.monthlyRevenue > 0 ? ((grossProfit / f.monthlyRevenue) * 100).toFixed(1) : '0.0';
+
+      // Break-even estimation: Fixed Costs / Contribution Margin Ratio
+      const fixedCosts = Number(f.labourExpense) + Number(f.marketingExpense) + Number(f.otherOperatingExpense) + 35000;
+      const variableCosts = totalExpenses - fixedCosts;
+      const contributionRatio = f.monthlyRevenue > 0 ? Math.max(0.1, (f.monthlyRevenue - variableCosts) / f.monthlyRevenue) : 0.35;
+      const breakEvenRevenue = Math.round(fixedCosts / contributionRatio);
+
+      return { totalExpenses, grossProfit, netProfit, netMarginPct, grossMarginPct, fixedCosts, variableCosts, breakEvenRevenue };
+    }
+
+    /*************************************************************************
+     * 5. MAIN RENDER CONTROLLER
+     *************************************************************************/
+    function renderApp() {
+      destroyCharts();
+      applyTheme();
+      updateGlobalBadges();
+
+      // Render Sidebar Nav
+      const navList = document.getElementById('navList');
+      const pendingApprovals = appState.approvals.filter(a => a.status === 'Pending').length;
+      navList.innerHTML = NAV_ITEMS.map(item => {
+        const isActive = appState.activeTab === item.id;
+        return `
+          <button onclick="navigateTo('${item.id}')"
+            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition cursor-pointer ${
+              isActive
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'hover:bg-zinc-500/10 border border-transparent'
+            }" style="${!isActive ? 'color: var(--text-secondary);' : ''}">
+            <span class="flex items-center gap-2.5 truncate">
+              <i data-lucide="${item.icon}" class="w-4 h-4 shrink-0 ${isActive ? 'text-amber-400' : ''}"></i>
+              <span class="truncate">${item.label}</span>
+            </span>
+            ${item.id === 'tasks' && pendingApprovals > 0
+              ? `<span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500 text-zinc-950 font-bold">${pendingApprovals}</span>`
+              : ''}
+          </button>
+        `;
+      }).join('');
+
+      // Update Header Title
+      const activeMeta = NAV_ITEMS.find(n => n.id === appState.activeTab) || NAV_ITEMS[0];
+      document.getElementById('pageTitle').textContent = activeMeta.label;
+      document.getElementById('pageSubtitle').textContent = activeMeta.subtitle;
+
+      // Render Active View
+      const workspace = document.getElementById('mainWorkspace');
+      switch (appState.activeTab) {
+        case 'dashboard': renderDashboard(workspace); break;
+        case 'ai-manager': renderAIManager(workspace); break;
+        case 'leads': renderLeadsFinder(workspace); break;
+        case 'suppliers': renderSupplierFinder(workspace); break;
+        case 'manufacturing': renderManufacturing(workspace); break;
+        case 'crm': renderCRM(workspace); break;
+        case 'distributors': renderDistributors(workspace); break;
+        case 'finance': renderFinance(workspace); break;
+        case 'marketing': renderMarketing(workspace); break;
+        case 'opportunities': renderOpportunities(workspace); break;
+        case 'tasks': renderTasksAndApprovals(workspace); break;
+        default: renderDashboard(workspace);
+      }
+
+      lucide.createIcons();
+    }
+
+    /*************************************************************************
+     * MODULE 1: EXECUTIVE DASHBOARD
+     *************************************************************************/
+    function renderDashboard(el) {
+      const fin = getFinanceMetrics();
+      const pendingOrders = appState.orders.filter(o => o.status !== 'Delivered').length;
+      const totalRawKg = appState.rawInventory.reduce((s, r) => s + Number(r.stockKg), 0);
+      const totalFinKg = appState.finishedInventory.reduce((s, f) => s + Number(f.stockKg), 0);
+      const pendingTasks = appState.tasks.filter(t => !t.completed);
+
+      el.innerHTML = `
+        <!-- Top AI Command Strip -->
+        <div class="glass-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-l-4 border-l-amber-500">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold">AI Executive Briefing &bull; Simulated Intelligence</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-400">DEMO DATA</span>
+            </div>
+            <p class="text-sm sm:text-base font-medium">
+              Monthly net profit is tracking at <span class="text-emerald-400 font-semibold">${formatINR(fin.netProfit)} (${fin.netMarginPct}%)</span>.
+              Cumin seed stock is low (<span class="text-amber-400 font-semibold">210 kg</span>) and <span class="text-amber-400 font-semibold">${appState.approvals.filter(a => a.status === 'Pending').length} AI-prepared actions</span> await your approval.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button onclick="navigateTo('ai-manager')" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="bot" class="w-4 h-4"></i> Ask AI Manager
+            </button>
+            <button onclick="navigateTo('tasks')" class="px-3.5 py-2 rounded-xl border text-xs font-semibold hover:bg-zinc-500/10 flex items-center gap-1.5 cursor-pointer" style="border-color: var(--border-strong);">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Review Approvals (${appState.approvals.filter(a => a.status === 'Pending').length})
+            </button>
+          </div>
+        </div>
+
+        <!-- 6 Core KPI Cards -->
+        <div id="dashboardKpiGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          ${kpiCard('Total Monthly Sales', formatINR(appState.finance.monthlyRevenue), '+12.4% vs last mo', 'trending-up', 'text-emerald-400')}
+          ${kpiCard('Total Expenses', formatINR(fin.totalExpenses), 'Raw Mat: 64.2% share', 'wallet', 'text-amber-400')}
+          ${kpiCard('Est. Net Profit', formatINR(fin.netProfit), `${fin.netMarginPct}% Net Margin`, 'indian-rupee', 'text-emerald-400')}
+          ${kpiCard('Pending Orders', `${pendingOrders} Orders`, `${formatINR(appState.orders.filter(o=>o.status!=='Delivered').reduce((s,o)=>s+o.amount,0))} value`, 'package-clock', 'text-blue-400')}
+          ${kpiCard('Active Customers', `${appState.customers.length} B2B Accounts`, `${appState.distributors.length} Distributors`, 'building-2', 'text-purple-400')}
+          ${kpiCard('New Business Leads', `${appState.leads.length} Qualified`, 'Avg Score: 91/100', 'user-plus', 'text-amber-400')}
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="glass-card p-5 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-display font-bold text-sm">Revenue, Expenses &amp; Net Profit Trajectory</h3>
+                <p class="text-xs" style="color: var(--text-muted);">6-Month Illustrative Trend (INR) &bull; DEMO DATA</p>
+              </div>
+              <button onclick="navigateTo('finance')" class="text-xs text-amber-400 hover:underline cursor-pointer">Open P&amp;L &rarr;</button>
+            </div>
+            <div class="h-64">
+              <canvas id="dashRevenueChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-display font-bold text-sm">Gross Margin by Masala SKU</h3>
+                <p class="text-xs" style="color: var(--text-muted);">Profitability % per kg &bull; DEMO DATA</p>
+              </div>
+            </div>
+            <div class="h-64">
+              <canvas id="dashMarginChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory & Suppliers Snapshot -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Raw Material Inventory -->
+          <div class="glass-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-display font-bold text-sm">Raw-Material Inventory</h3>
+                <p class="text-xs" style="color: var(--text-muted);">Total: ${totalRawKg.toLocaleString()} kg in Panipat Silos</p>
+              </div>
+              <button onclick="navigateTo('suppliers')" class="text-xs text-amber-400 hover:underline cursor-pointer">Procure &rarr;</button>
+            </div>
+            <div class="space-y-3">
+              ${appState.rawInventory.map(item => {
+                const pct = Math.min(100, Math.round((item.stockKg / (item.minStockKg * 3)) * 100));
+                const isLow = item.stockKg < item.minStockKg;
+                return `
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                      <span class="font-medium">${item.name}</span>
+                      <span class="font-mono ${isLow ? 'text-red-400 font-semibold' : ''}">${item.stockKg} kg ${isLow ? '(LOW)' : ''}</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-zinc-700/40 overflow-hidden">
+                      <div class="h-full rounded-full ${isLow ? 'bg-red-500' : 'bg-amber-500'}" style="width: ${pct}%"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Finished Masala Inventory -->
+          <div class="glass-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-display font-bold text-sm">Finished Masala Stock</h3>
+                <p class="text-xs" style="color: var(--text-muted);">Total: ${totalFinKg.toLocaleString()} kg Ready to Dispatch</p>
+              </div>
+              <button onclick="navigateTo('manufacturing')" class="text-xs text-amber-400 hover:underline cursor-pointer">Produce &rarr;</button>
+            </div>
+            <div class="space-y-3">
+              ${appState.finishedInventory.map(item => {
+                const pct = Math.min(100, Math.round((item.stockKg / (item.minStockKg * 3)) * 100));
+                const isLow = item.stockKg < item.minStockKg;
+                return `
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                      <span class="font-medium">${item.name.replace('Rajgiri ', '')}</span>
+                      <span class="font-mono ${isLow ? 'text-red-400 font-semibold' : 'text-emerald-400'}">${item.stockKg} kg</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-zinc-700/40 overflow-hidden">
+                      <div class="h-full rounded-full ${isLow ? 'bg-red-500' : 'bg-emerald-500'}" style="width: ${pct}%"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Supplier Directory Snapshot -->
+          <div class="glass-card p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-display font-bold text-sm">Active Mandi Suppliers</h3>
+                <p class="text-xs" style="color: var(--text-muted);">${appState.suppliers.length} Tracked Sources (Illustrative)</p>
+              </div>
+              <button onclick="navigateTo('suppliers')" class="text-xs text-amber-400 hover:underline cursor-pointer">Compare &rarr;</button>
+            </div>
+            <div class="space-y-2.5">
+              ${appState.suppliers.slice(0, 4).map(s => `
+                <div class="p-2.5 rounded-xl border text-xs flex items-center justify-between" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  <div class="min-w-0 pr-2">
+                    <p class="font-semibold truncate">${s.name.replace(' (Illustrative)', '')}</p>
+                    <p class="text-[11px] truncate" style="color: var(--text-muted);">${s.spice} &bull; ${s.location}</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <span class="font-mono font-semibold text-amber-400">₹${s.indicativePrice}/kg</span>
+                    <p class="text-[10px]" style="color: var(--text-muted);">MOQ ${s.moqKg}kg</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Grid: AI Insights, Today's Tasks, Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- AI-Generated Business Insights -->
+          <div class="glass-card p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-display font-bold text-sm flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                AI Strategic Insights
+              </h3>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">SIMULATED</span>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5">
+                <p class="font-semibold text-emerald-400 mb-0.5">Highest Margin Winner: Shahi Garam Masala</p>
+                <p style="color: var(--text-secondary);">Generates 30.5% gross margin (₹195/kg). Bundling 5kg Garam Masala with bulk Chilli orders can lift blended profit by +3.2%.</p>
+              </div>
+              <div class="p-3 rounded-xl border border-amber-500/25 bg-amber-500/5">
+                <p class="font-semibold text-amber-400 mb-0.5">Procurement Timing Alert: Cumin Seeds</p>
+                <p style="color: var(--text-secondary);">Unjha Sortex Cumin is at ₹268/kg. Locking 500kg now protects Q4 roasted cumin margins before winter demand spikes.</p>
+              </div>
+              <div class="p-3 rounded-xl border border-blue-500/25 bg-blue-500/5">
+                <p class="font-semibold text-blue-400 mb-0.5">HoReCa Lead Concentration in Haryana</p>
+                <p style="color: var(--text-secondary);">6 high-score hotels &amp; dhabas along NH-44 represent ~2,390 kg/month recurring demand.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Recommended Tasks -->
+          <div class="glass-card p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-display font-bold text-sm flex items-center gap-2">
+                <i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i>
+                Today's Recommended Tasks
+              </h3>
+              <button onclick="navigateTo('tasks')" class="text-xs text-amber-400 hover:underline cursor-pointer">All Tasks &rarr;</button>
+            </div>
+            <div class="space-y-2">
+              ${pendingTasks.slice(0, 4).map(t => `
+                <label class="p-2.5 rounded-xl border flex items-start gap-2.5 text-xs cursor-pointer hover:border-amber-500/40 transition" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('${t.id}')" class="mt-0.5 accent-amber-500 rounded cursor-pointer" />
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium leading-snug">${t.title}</p>
+                    <div class="flex items-center gap-2 mt-1 text-[10px]" style="color: var(--text-muted);">
+                      <span class="px-1.5 py-0.2 rounded ${t.priority === 'High' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'}">${t.priority}</span>
+                      <span>Due ${t.deadline}</span>
+                    </div>
+                  </div>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Recent Business Activities -->
+          <div class="glass-card p-5 space-y-3">
+            <h3 class="font-display font-bold text-sm flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-blue-400"></i>
+              Recent Operational Activity
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex items-start gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></span>
+                <div>
+                  <p class="font-medium">Order #ORD-502 Dispatched (250 kg Chilli Powder)</p>
+                  <p style="color: var(--text-muted);">Shree Balaji Kirana &bull; Paid ₹71,250</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400 mt-1.5 shrink-0"></span>
+                <div>
+                  <p class="font-medium">Batch #BCH-205 Entered Packaging Stage</p>
+                  <p style="color: var(--text-muted);">382 kg Salem Turmeric Powder &bull; Cost ₹176.18/kg</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-blue-400 mt-1.5 shrink-0"></span>
+                <div>
+                  <p class="font-medium">AI Prepared Bulk Quote for Sethi Dhaba</p>
+                  <p style="color: var(--text-muted);">420 kg/mo assortment &bull; Awaiting Owner Approval</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-purple-400 mt-1.5 shrink-0"></span>
+                <div>
+                  <p class="font-medium">Coriander Seeds PO #893 In Transit</p>
+                  <p style="color: var(--text-muted);">1,200 kg from Ramganj Mandi @ ₹91/kg</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      initDashboardCharts();
+    }
+
+    function kpiCard(title, value, sub, icon, accentClass) {
+      return `
+        <div class="glass-card p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium" style="color: var(--text-muted);">${title}</span>
+            <div class="p-1.5 rounded-lg" style="background-color: var(--bg-elevated);">
+              <i data-lucide="${icon}" class="w-3.5 h-3.5 ${accentClass}"></i>
+            </div>
+          </div>
+          <div class="font-display font-bold text-lg sm:text-xl tracking-tight">${value}</div>
+          <div class="text-[11px] font-medium ${accentClass}">${sub}</div>
+        </div>
+      `;
+    }
+
+    function initDashboardCharts() {
+      const isDark = appState.theme === 'dark';
+      const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)';
+      const textColor = isDark ? '#a1a1aa' : '#475569';
+      const fin = getFinanceMetrics();
+
+      const ctx1 = document.getElementById('dashRevenueChart');
+      if (ctx1) {
+        activeCharts.push(new Chart(ctx1, {
+          type: 'line',
+          data: {
+            labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov (Est)'],
+            datasets: [
+              {
+                label: 'Sales Revenue (₹)',
+                data: [1120000, 1190000, 1265000, 1340000, 1410000, appState.finance.monthlyRevenue],
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2.5
+              },
+              {
+                label: 'Total Expenses (₹)',
+                data: [940000, 985000, 1030000, 1095000, 1155000, fin.totalExpenses],
+                borderColor: '#64748b',
+                backgroundColor: 'transparent',
+                borderDash: [5, 5],
+                tension: 0.35,
+                borderWidth: 2
+              },
+              {
+                label: 'Net Profit (₹)',
+                data: [180000, 205000, 235000, 245000, 255000, fin.netProfit],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2.5
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: textColor, font: { size: 11 } } } },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+              y: {
+                grid: { color: gridColor },
+                ticks: {
+                  color: textColor,
+                  font: { size: 11 },
+                  callback: v => '₹' + (v / 100000).toFixed(1) + 'L'
+                }
+              }
+            }
+          }
+        }));
+      }
+
+      const ctx2 = document.getElementById('dashMarginChart');
+      if (ctx2) {
+        activeCharts.push(new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: appState.finishedInventory.map(f => f.name.replace('Rajgiri ', '')),
+            datasets: [{
+              data: appState.finishedInventory.map(f => f.marginPct),
+              backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '64%',
+            plugins: {
+              legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 }, boxWidth: 10 } }
+            }
+          }
+        }));
+      }
+    }
+
+    /*************************************************************************
+     * MODULE 2: AI BUSINESS MANAGER (CENTRAL AUTONOMOUS COPILOT)
+     *************************************************************************/
+    const AI_SUGGESTED_COMMANDS = [
+      'Find 50 hotels in Haryana that may purchase spices in bulk.',
+      'Find raw red chilli suppliers with competitive wholesale prices.',
+      'Find restaurants and caterers that regularly purchase masalas.',
+      'Compare available turmeric suppliers.',
+      'Show my pending customer follow-ups.',
+      'Calculate the profit margin on my chilli powder.',
+      'Find potential distributors in nearby cities.',
+      'Prepare a marketing plan for this month.',
+      'Show which products are giving the highest profit.'
+    ];
+
+    function renderAIManager(el) {
+      const pendingApprovals = appState.approvals.filter(a => a.status === 'Pending');
+
+      el.innerHTML = `
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+          <!-- Left/Center Chat & Workflow Execution (8 cols) -->
+          <div class="xl:col-span-8 glass-card flex flex-col h-[74vh] min-h-[540px]">
+            <!-- Header -->
+            <div class="p-4 border-b flex flex-wrap items-center justify-between gap-2" style="border-color: var(--border-subtle);">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <i data-lucide="bot" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h2 class="font-display font-bold text-sm">Rajgiri Autonomous Co-Pilot</h2>
+                  <p class="text-[11px]" style="color: var(--text-muted);">Simulated Business-Aware AI Engine &bull; Connected to Live Local Demo State</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-1 rounded bg-blue-500/15 text-blue-400 border border-blue-500/25">
+                SIMULATED AI WORKFLOWS (NO EXTERNAL API)
+              </span>
+            </div>
+
+            <!-- Suggested Command Chips -->
+            <div class="px-4 py-2.5 border-b overflow-x-auto flex items-center gap-2 shrink-0" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+              <span class="text-[11px] font-semibold shrink-0 text-amber-400">Try Command:</span>
+              ${AI_SUGGESTED_COMMANDS.map(cmd => `
+                <button onclick="sendAICommand('${cmd.replace(/'/g, "\\'")}')"
+                  class="shrink-0 text-[11px] px-2.5 py-1 rounded-full border hover:border-amber-500/50 hover:text-amber-400 transition cursor-pointer"
+                  style="background-color: var(--bg-surface); border-color: var(--border-subtle);">
+                  ${cmd}
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- Messages Area -->
+            <div id="aiChatStream" class="flex-1 overflow-y-auto p-4 space-y-4">
+              ${appState.chatHistory.map(msg => renderChatBubble(msg)).join('')}
+            </div>
+
+            <!-- Input Bar -->
+            <form onsubmit="handleAIChatSubmit(event)" class="p-3.5 border-t flex items-center gap-2" style="border-color: var(--border-subtle);">
+              <input id="aiChatInput" type="text" required
+                placeholder="Ask your AI Manager (e.g. 'Calculate the profit margin on my chilli powder' or 'Compare turmeric suppliers')..."
+                class="flex-1 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-amber-500"
+                style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+              <button type="submit" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+                <span>Execute</span>
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- Right Sidebar: Inline Approvals, Insights & Activity Log (4 cols) -->
+          <div class="xl:col-span-4 space-y-5">
+            <!-- Approval Requests Queue -->
+            <div class="glass-card p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="font-display font-bold text-sm flex items-center gap-2">
+                  <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+                  Owner Approval Queue (${pendingApprovals.length})
+                </h3>
+                <button onclick="navigateTo('tasks')" class="text-xs text-amber-400 hover:underline cursor-pointer">Full Vault</button>
+              </div>
+              <p class="text-[11px]" style="color: var(--text-muted);">AI prepares drafts below. Nothing executes externally until you approve.</p>
+              <div class="space-y-2.5">
+                ${pendingApprovals.length === 0
+                  ? `<p class="text-xs py-4 text-center" style="color: var(--text-muted);">All AI proposals reviewed.</p>`
+                  : pendingApprovals.map(a => `
+                    <div class="p-3 rounded-xl border space-y-2 text-xs" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">${a.type}</span>
+                        <span class="font-mono font-semibold">${a.amount}</span>
+                      </div>
+                      <p class="font-semibold">${a.title}</p>
+                      <p class="text-[11px]" style="color: var(--text-muted);">${a.reason}</p>
+                      <div class="flex items-center gap-2 pt-1">
+                        <button onclick="decideApproval('${a.id}', 'Approved')" class="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] cursor-pointer">Approve</button>
+                        <button onclick="decideApproval('${a.id}', 'Rejected')" class="flex-1 py-1.5 rounded-lg border hover:bg-red-500/15 hover:text-red-400 font-medium text-[11px] cursor-pointer" style="border-color: var(--border-subtle);">Reject</button>
+                      </div>
+                    </div>
+                  `).join('')}
+              </div>
+            </div>
+
+            <!-- Live Business Snapshot -->
+            <div class="glass-card p-4 space-y-2.5 text-xs">
+              <h3 class="font-display font-bold text-sm">Context Engine Memory</h3>
+              <div class="flex justify-between py-1 border-b" style="border-color: var(--border-subtle);">
+                <span style="color: var(--text-muted);">Tracked B2B Leads</span>
+                <span class="font-mono font-semibold">${appState.leads.length} Leads</span>
+              </div>
+              <div class="flex justify-between py-1 border-b" style="border-color: var(--border-subtle);">
+                <span style="color: var(--text-muted);">Mandi Suppliers Indexed</span>
+                <span class="font-mono font-semibold">${appState.suppliers.length} Suppliers</span>
+              </div>
+              <div class="flex justify-between py-1 border-b" style="border-color: var(--border-subtle);">
+                <span style="color: var(--text-muted);">Top Margin Product</span>
+                <span class="font-mono font-semibold text-emerald-400">Shahi Garam Masala (30.5%)</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span style="color: var(--text-muted);">Total Receivables Due</span>
+                <span class="font-mono font-semibold text-amber-400">${formatINR(appState.customers.reduce((s,c)=>s+c.outstanding,0))}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const stream = document.getElementById('aiChatStream');
+      if (stream) stream.scrollTop = stream.scrollHeight;
+    }
+
+    function renderChatBubble(msg) {
+      const isUser = msg.sender === 'user';
+      const formattedText = msg.text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br/>');
+
+      if (isUser) {
+        return `
+          <div class="flex justify-end">
+            <div class="max-w-[82%] rounded-2xl rounded-tr-xs px-4 py-3 bg-amber-500 text-zinc-950 text-xs sm:text-sm font-medium shadow-xs">
+              ${formattedText}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="max-w-[88%] rounded-2xl rounded-tl-xs p-4 border text-xs sm:text-[13px] leading-relaxed space-y-3" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+            <div>${formattedText}</div>
+            ${msg.actionBtn ? `
+              <div class="pt-1 flex flex-wrap gap-2">
+                <button onclick="${msg.actionBtn.fn}" class="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-zinc-950 font-semibold text-xs transition cursor-pointer">
+                  ${msg.actionBtn.label}
+                </button>
+                ${msg.googleLink ? `
+                  <a href="${msg.googleLink}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg border hover:bg-zinc-500/10 text-xs font-medium inline-flex items-center gap-1" style="border-color: var(--border-subtle);">
+                    <span>Open Live Google Search</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                ` : ''}
+              </div>
+            ` : ''}
+            <div class="text-[10px] font-mono" style="color: var(--text-muted);">Simulated AI Manager &bull; ${msg.time}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleAIChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('aiChatInput');
+      const query = input.value.trim();
+      if (!query) return;
+      input.value = '';
+      sendAICommand(query);
+    }
+
+    function sendAICommand(query) {
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      appState.chatHistory.push({ sender: 'user', time: now, text: query });
+
+      const reply = generateSimulatedAIResponse(query);
+      appState.chatHistory.push({ sender: 'ai', time: now, ...reply });
+
+      saveState();
+      if (appState.activeTab === 'ai-manager') {
+        renderApp();
+      } else {
+        navigateTo('ai-manager');
+      }
+    }
+
+    function generateSimulatedAIResponse(q) {
+      const lower = q.toLowerCase();
+
+      if (lower.includes('hotel') || lower.includes('haryana')) {
+        return {
+          text: `**Haryana HoReCa Buyer Discovery Plan (Simulated Analysis)**\n\nI have segmented the Haryana NH-44 & NCR hospitality belt (Panipat, Karnal, Ambala, Gurugram, Sonipat) into high-consumption spice clusters:\n• **Tier-1 Banquet Hotels (18 Targets):** Est. 250–400 kg/month per property (Chilli, Turmeric, Shahi Garam Masala).\n• **Highway Dhabas (22 Targets):** Est. 350–500 kg/month per kitchen (High Chilli & Coriander rotation).\n• **Existing Illustrative Pipeline:** You already have **Hotel Noor Mahal (280 kg/mo)** and **Sethi Dhaba (420 kg/mo)** staged in your Lead Finder.\n\n*Note: To verify real-time phone numbers and addresses, use the live Google discovery link below.*`,
+          actionBtn: { label: 'Open Customer & Bulk Buyer Finder', fn: "navigateTo('leads')" },
+          googleLink: googleSearchURL('hotels and banquet halls in Haryana bulk spice buyers')
+        };
+      }
+
+      if (lower.includes('chilli') && (lower.includes('supplier') || lower.includes('raw'))) {
+        const s1 = appState.suppliers[0];
+        const s2 = appState.suppliers[1];
+        return {
+          text: `**Raw Whole Red Chilli Procurement Comparison (Illustrative Data)**\n\n1. **${s1.name}** (${s1.location})\n   • Indicative Rate: **₹${s1.indicativePrice}/kg** | MOQ: ${s1.moqKg} kg | Spec: ${s1.quality}\n2. **${s2.name}** (${s2.location})\n   • Indicative Rate: **₹${s2.indicativePrice}/kg** | MOQ: ${s2.moqKg} kg | Spec: ${s2.quality}\n\n**Manager Recommendation:** Blend **75% Guntur Teja S17** (for pungency & cost efficiency) + **25% Byadgi** (for deep natural crimson color) to achieve a landed raw cost of ~₹190/kg.`,
+          actionBtn: { label: 'Compare & Draft PO in Supplier Finder', fn: "navigateTo('suppliers')" },
+          googleLink: googleSearchURL('whole red chilli wholesale suppliers Guntur Byadgi mandi price')
+        };
+      }
+
+      if (lower.includes('turmeric')) {
+        return {
+          text: `**Turmeric Finger Supplier Comparison (Illustrative Data)**\n\n• **Nizamabad Haldi Farmers Co-op:** **₹146/kg** (4.2% Curcumin, Double Polished, MOQ 500 kg) — *Best for standard HoReCa & wholesale packs.*\n• **Erode Golden Turmeric Mart:** **₹158/kg** (4.6% Curcumin, Export Grade, MOQ 400 kg) — *Best for premium retail pouches.*\n\nCurrent factory stock is **820 kg**, sufficient for ~18 days of production.`,
+          actionBtn: { label: 'Open Supplier Comparison Matrix', fn: "navigateTo('suppliers')" },
+          googleLink: googleSearchURL('turmeric finger wholesale suppliers Nizamabad Erode')
+        };
+      }
+
+      if (lower.includes('restaurant') || lower.includes('caterer')) {
+        return {
+          text: `**Restaurants & Wedding Caterers Opportunity Analysis**\n\nNovember–February is peak North Indian catering season. Caterers prioritize **consistent color, aroma stability, and 5kg/10kg moisture-barrier pouches**.\n• **Top Active Leads:** Royal Tandoor & Catering Co. (Gurugram — 350 kg/mo est.) & Grand Oberoi Caterers.\n• **Action Prepared:** I recommend offering a 1kg 4-spice Chef Sample Box to 15 caterers in Sonipat & Delhi NCR.`,
+          actionBtn: { label: 'View Caterer Leads', fn: "navigateTo('leads')" },
+          googleLink: googleSearchURL('wedding caterers and restaurants in Panipat Gurugram Delhi NCR')
+        };
+      }
+
+      if (lower.includes('follow-up') || lower.includes('follow up') || lower.includes('pending')) {
+        const dueLeads = appState.leads.slice(0, 3).map(l => `• **${l.name}** (${l.city}) — ${l.demandKg} kg/mo est. • Follow-up: ${l.followUp}`).join('\n');
+        return {
+          text: `**Pending Customer & Lead Follow-Ups**\n\n${dueLeads}\n\n• **Overdue Payment Alert:** Grand Oberoi Caterers has **₹64,500** pending balance.\n\n*Security Check: Reminder drafts require your approval before any WhatsApp/Email is sent.*`,
+          actionBtn: { label: 'Open Sales & Customer CRM', fn: "navigateTo('crm')" }
+        };
+      }
+
+      if (lower.includes('margin') && lower.includes('chilli')) {
+        const chilli = appState.finishedInventory[0];
+        const grossProfitKg = chilli.sellingPricePerKg - chilli.costPerKg;
+        return {
+          text: `**Unit Economics: ${chilli.name} (Demo Calculation)**\n\n• **Raw Chilli Input (incl. 6% grinding wastage):** ₹193.60 / kg\n• **Grinding, Cleaning & Electricity:** ₹12.40 / kg\n• **Packaging (1kg BOPP/Laminated Pouch):** ₹12.00 / kg\n• **Total Landed Cost:** **₹${chilli.costPerKg} / kg**\n• **Wholesale Selling Price:** **₹${chilli.sellingPricePerKg} / kg**\n• **Gross Profit:** **₹${grossProfitKg} / kg (${chilli.marginPct}%)**\n\n*Tip: Increasing batch size from 300 kg to 600 kg lowers electricity/labour overhead by ~₹4.50/kg.*`,
+          actionBtn: { label: 'Simulate Batch Costing', fn: "navigateTo('manufacturing')" }
+        };
+      }
+
+      if (lower.includes('distributor')) {
+        return {
+          text: `**Nearby Distributor Expansion Strategy**\n\nCurrently active in **Ambala (Mittal FMCG)** and onboarding **Hisar (Kamboj Agro)**.\n• **High-Priority White Spaces:** Karnal, Kurukshetra, Rohtak, and Saharanpur (UP).\n• **Recommended Structure:** 14% base distributor margin + 2% quarterly volume rebate above 1,200 kg.`,
+          actionBtn: { label: 'Manage Distributors', fn: "navigateTo('distributors')" },
+          googleLink: googleSearchURL('FMCG food and spice distributors in Karnal Rohtak Haryana')
+        };
+      }
+
+      if (lower.includes('marketing')) {
+        return {
+          text: `**30-Day Rajgiri Spices Growth & Marketing Plan (Simulated)**\n\n1. **Week 1 (Trust & Purity):** Instagram Reels demonstrating low-temp grinding & home adulteration tests.\n2. **Week 2 (HoReCa Direct):** Dispatch 25 Chef Tasting Kits to NH-44 hotels & wedding caterers.\n3. **Week 3 (Distributor Drive):** Targeted B2B outreach in Karnal & Rohtak.\n4. **Week 4 (Retail Pull):** Kirana counter display stand offer (Buy 10kg mixed pouches, get 1kg Turmeric free).`,
+          actionBtn: { label: 'Open Marketing Workspace', fn: "navigateTo('marketing')" }
+        };
+      }
+
+      if (lower.includes('highest profit') || lower.includes('products')) {
+        const sorted = [...appState.finishedInventory].sort((a, b) => b.marginPct - a.marginPct);
+        const list = sorted.map((p, idx) => `${idx + 1}. **${p.name}** — **${p.marginPct}% Margin** (Cost ₹${p.costPerKg} → Sell ₹${p.sellingPricePerKg}/kg)`).join('\n');
+        return {
+          text: `**Product-Wise Profitability Ranking (Demo Data)**\n\n${list}\n\n**Strategic Takeaway:** Blended masalas (**Shahi Garam Masala**) yield 4.4% higher margin than plain chilli powder because proprietary spice formulation commands brand pricing power.`,
+          actionBtn: { label: 'Inspect Full P&L Analytics', fn: "navigateTo('finance')" }
+        };
+      }
+
+      return {
+        text: `**AI Manager Analysis for "${q}"**\n\nBased on your current Rajgiri Spices operating metrics (Monthly Sales: **${formatINR(appState.finance.monthlyRevenue)}**, Net Margin: **${getFinanceMetrics().netMarginPct}%**):\n• **Actionable Insight:** Focus immediate sales capacity on **HoReCa bulk accounts** (28–30% gross margins) and replenish **Cumin Seeds (210 kg)** via the pending PO draft in your Approval Queue.\n• Use the modules on the left to inspect live calculators, compare mandi suppliers, or draft quotations.`,
+        actionBtn: { label: 'Review Approval Queue', fn: "navigateTo('tasks')" }
+      };
+    }
+
+    /*************************************************************************
+     * MODULE 3: CUSTOMER & BULK BUYER FINDER
+     *************************************************************************/
+    let leadFilters = { category: 'All', state: 'All', search: '' };
+
+    function renderLeadsFinder(el) {
+      const categories = ['All', 'Hotels', 'Restaurants', 'Dhabas', 'Caterers', 'Sweet shops', 'Food manufacturers', 'Grocery stores', 'Supermarkets', 'Wholesale spice dealers', 'Retail distributors'];
+      const states = ['All', ...new Set(appState.leads.map(l => l.state))];
+
+      const filtered = appState.leads.filter(l => {
+        const matchCat = leadFilters.category === 'All' || l.category === leadFilters.category;
+        const matchState = leadFilters.state === 'All' || l.state === leadFilters.state;
+        const matchText = !leadFilters.search ||
+          l.name.toLowerCase().includes(leadFilters.search.toLowerCase()) ||
+          l.city.toLowerCase().includes(leadFilters.search.toLowerCase()) ||
+          l.notes.toLowerCase().includes(leadFilters.search.toLowerCase());
+        return matchCat && matchState && matchText;
+      });
+
+      const liveSearchQuery = `${leadFilters.category === 'All' ? 'hotels restaurants caterers wholesale spice buyers' : leadFilters.category} in ${leadFilters.search || (leadFilters.state === 'All' ? 'Haryana India' : leadFilters.state)}`;
+
+      el.innerHTML = `
+        <!-- Header & Real Google Discovery Bar -->
+        <div class="glass-card p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-display font-bold text-base">B2B &amp; HoReCa Bulk Buyer Discovery Workspace</h2>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-400">SAMPLE LEADS ILLUSTRATIVE</span>
+              </div>
+              <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+                Filter illustrative pipeline leads or launch live Google search queries to discover verified local businesses.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <a href="${googleSearchURL(liveSearchQuery)}" target="_blank" rel="noopener noreferrer"
+                class="px-3.5 py-2 rounded-xl border border-blue-500/40 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-xs font-semibold inline-flex items-center gap-1.5">
+                <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                <span>Search Live on Google</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+              <button onclick="openAddLeadModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Target Lead
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input type="text" value="${leadFilters.search}" oninput="leadFilters.search = this.value; renderApp();"
+              placeholder="Search city (e.g. Panipat, Karnal), business name..."
+              class="px-3.5 py-2 rounded-xl border text-xs focus:outline-none focus:border-amber-500"
+              style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+
+            <select onchange="leadFilters.category = this.value; renderApp();"
+              class="px-3.5 py-2 rounded-xl border text-xs focus:outline-none focus:border-amber-500"
+              style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+              ${categories.map(c => `<option value="${c}" ${leadFilters.category === c ? 'selected' : ''}>Category: ${c}</option>`).join('')}
+            </select>
+
+            <select onchange="leadFilters.state = this.value; renderApp();"
+              class="px-3.5 py-2 rounded-xl border text-xs focus:outline-none focus:border-amber-500"
+              style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+              ${states.map(s => `<option value="${s}" ${leadFilters.state === s ? 'selected' : ''}>State/UT: ${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <!-- Lead Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          ${filtered.map(lead => `
+            <div class="glass-card p-4 flex flex-col justify-between space-y-3">
+              <div class="space-y-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-semibold">${lead.category}</span>
+                    <h3 class="font-display font-bold text-sm mt-1.5">${lead.name}</h3>
+                    <p class="text-xs flex items-center gap-1 mt-0.5" style="color: var(--text-muted);">
+                      <i data-lucide="map-pin" class="w-3 h-3"></i> ${lead.city}, ${lead.state}
+                    </p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="text-[10px] uppercase font-mono" style="color: var(--text-muted);">AI Priority</div>
+                    <span class="font-mono font-bold text-sm ${lead.score >= 90 ? 'text-emerald-400' : 'text-amber-400'}">${lead.score}/100</span>
+                  </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl border text-xs space-y-1" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  <div class="flex justify-between">
+                    <span style="color: var(--text-muted);">Est. Monthly Demand:</span>
+                    <span class="font-mono font-semibold text-emerald-400">${lead.demandKg} kg / mo</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span style="color: var(--text-muted);">Stage / Status:</span>
+                    <span class="font-semibold">${lead.status}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span style="color: var(--text-muted);">Follow-Up Date:</span>
+                    <span class="font-mono">${lead.followUp}</span>
+                  </div>
+                  <div class="pt-1 border-t text-[11px]" style="border-color: var(--border-subtle); color: var(--text-secondary);">
+                    ${lead.contact}
+                  </div>
+                </div>
+
+                <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">${lead.notes}</p>
+              </div>
+
+              <div class="pt-2 border-t flex flex-wrap items-center justify-between gap-2" style="border-color: var(--border-subtle);">
+                <a href="${googleSearchURL(`${lead.category} in ${lead.city} ${lead.state}`)}" target="_blank" rel="noopener noreferrer"
+                  class="text-[11px] text-blue-400 hover:underline inline-flex items-center gap-1">
+                  <span>Google Search</span><i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="draftQuoteFromLead('${lead.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 text-amber-400 hover:bg-amber-500 hover:text-zinc-950 text-[11px] font-semibold transition cursor-pointer">
+                    Draft Quote
+                  </button>
+                  <button onclick="deleteLead('${lead.id}')" class="p-1.5 rounded-lg hover:bg-red-500/15 text-zinc-400 hover:text-red-400 cursor-pointer" title="Delete Lead">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function openAddLeadModal() {
+      openModal('Add Illustrative Target Buyer Lead', `
+        <form onsubmit="saveNewLead(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Business Name</label>
+            <input name="name" required placeholder="e.g. Royal Regency Banquet (Demo)" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Business Category</label>
+              <select name="category" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <option>Hotels</option><option>Restaurants</option><option>Dhabas</option><option>Caterers</option>
+                <option>Sweet shops</option><option>Food manufacturers</option><option>Grocery stores</option>
+                <option>Supermarkets</option><option>Wholesale spice dealers</option><option>Retail distributors</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Est. Monthly Demand (kg)</label>
+              <input name="demandKg" type="number" required value="250" min="10" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">City</label>
+              <input name="city" required value="Karnal" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">State</label>
+              <input name="state" required value="Haryana" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Contact Info (Illustrative)</label>
+              <input name="contact" value="Purchase Desk • Demo Contact" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Follow-Up Date</label>
+              <input name="followUp" type="date" value="2026-11-16" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Notes &amp; Spice Requirements</label>
+            <textarea name="notes" rows="2" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">Requires monthly bulk HoReCa packs of Chilli, Turmeric & Garam Masala.</textarea>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Save Lead</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function saveNewLead(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      appState.leads.unshift({
+        id: 'LD-' + Math.floor(200 + Math.random() * 700),
+        name: fd.get('name'),
+        category: fd.get('category'),
+        city: fd.get('city'),
+        state: fd.get('state'),
+        contact: fd.get('contact'),
+        demandKg: Number(fd.get('demandKg')),
+        status: 'New Lead',
+        followUp: fd.get('followUp'),
+        score: Math.min(98, 78 + Math.floor(Number(fd.get('demandKg')) / 30)),
+        notes: fd.get('notes')
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('New buyer lead added to pipeline.', 'success');
+    }
+
+    function deleteLead(id) {
+      appState.leads = appState.leads.filter(l => l.id !== id);
+      saveState();
+      renderApp();
+      showToast('Lead removed.', 'info');
+    }
+
+    function draftQuoteFromLead(leadId) {
+      const lead = appState.leads.find(l => l.id === leadId);
+      if (!lead) return;
+      const estAmount = lead.demandKg * 245;
+      appState.approvals.unshift({
+        id: 'APR-' + Math.floor(100 + Math.random() * 899),
+        type: 'Customer Quotation',
+        title: `Bulk Quote: ${lead.name} (${lead.demandKg} kg/mo)`,
+        amount: formatINR(estAmount),
+        reason: `AI drafted HoReCa quotation for ${lead.category} in ${lead.city}. Requires owner sign-off before sending.`,
+        status: 'Pending',
+        createdAt: 'Just now'
+      });
+      saveState();
+      showToast(`Quotation drafted for ${lead.name} and sent to Owner Approval Queue!`, 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 4: RAW MATERIAL AND SUPPLIER FINDER
+     *************************************************************************/
+    let supplierSpiceFilter = 'All';
+
+    function renderSupplierFinder(el) {
+      const spices = ['All', 'Whole Red Chilli', 'Turmeric Fingers', 'Coriander Seeds', 'Cumin Seeds', 'Black Pepper'];
+      const filteredSuppliers = appState.suppliers.filter(s =>
+        supplierSpiceFilter === 'All' || s.spice.toLowerCase().includes(supplierSpiceFilter.toLowerCase())
+      );
+
+      el.innerHTML = `
+        <!-- Top Banner -->
+        <div class="glass-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-display font-bold text-base">Raw Spice Procurement &amp; Mandi Comparison</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400">INDICATIVE DEMO PRICES</span>
+            </div>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+              Compare indicative wholesale mandi rates vs. verified market searches. All Purchase Enquiries route to Owner Approval.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="${googleSearchURL(supplierSpiceFilter === 'All' ? 'wholesale raw spices mandi price India' : supplierSpiceFilter + ' wholesale mandi price suppliers India')}"
+              target="_blank" rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl border border-blue-500/40 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-xs font-semibold inline-flex items-center gap-1.5">
+              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+              <span>Verify Market Rates on Google</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+            <button onclick="openAddSupplierModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Supplier Quote
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex flex-wrap gap-2">
+          ${spices.map(sp => `
+            <button onclick="supplierSpiceFilter = '${sp}'; renderApp();"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+                supplierSpiceFilter === sp
+                  ? 'bg-amber-500 text-zinc-950 border-amber-500 font-semibold'
+                  : 'hover:border-amber-500/40'
+              }" style="${supplierSpiceFilter !== sp ? 'background-color: var(--bg-surface); border-color: var(--border-subtle);' : ''}">
+              ${sp}
+            </button>
+          `).join('')}
+        </div>
+
+        <!-- Supplier Comparison Table -->
+        <div id="supplierComparisonCard" class="glass-card overflow-hidden">
+          <div class="p-4 border-b flex items-center justify-between" style="border-color: var(--border-subtle);">
+            <h3 class="font-display font-bold text-sm">Supplier Comparison Directory (${filteredSuppliers.length})</h3>
+            <span class="text-[11px]" style="color: var(--text-muted);">*Prices shown are illustrative demo quotes</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b text-[11px] uppercase font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle); color: var(--text-muted);">
+                  <th class="p-3.5">Supplier &amp; Origin</th>
+                  <th class="p-3.5">Raw Material</th>
+                  <th class="p-3.5">Indicative Price</th>
+                  <th class="p-3.5">MOQ / Avail.</th>
+                  <th class="p-3.5">Quality Grade</th>
+                  <th class="p-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y" style="border-color: var(--border-subtle);">
+                ${filteredSuppliers.map(s => `
+                  <tr class="hover:bg-zinc-500/5">
+                    <td class="p-3.5">
+                      <div class="font-semibold">${s.name}</div>
+                      <div class="text-[11px]" style="color: var(--text-muted);">${s.location} &bull; ★ ${s.rating}</div>
+                    </td>
+                    <td class="p-3.5 font-medium">${s.spice}</td>
+                    <td class="p-3.5">
+                      <span class="font-mono font-bold text-amber-400 text-sm">₹${s.indicativePrice}/kg</span>
+                      <div class="text-[10px]" style="color: var(--text-muted);">Illustrative</div>
+                    </td>
+                    <td class="p-3.5 font-mono">
+                      <div>MOQ: ${s.moqKg} kg</div>
+                      <div class="text-[11px]" style="color: var(--text-muted);">Stock: ${s.availableKg.toLocaleString()} kg</div>
+                    </td>
+                    <td class="p-3.5 max-w-xs">${s.quality}</td>
+                    <td class="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                      <a href="${googleSearchURL(s.spice + ' wholesale supplier ' + s.location)}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[11px] hover:bg-zinc-500/10" style="border-color: var(--border-subtle);">
+                        Verify <i data-lucide="external-link" class="w-3 h-3"></i>
+                      </a>
+                      <button onclick="openPurchaseRequestModal('${s.id}')"
+                        class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-[11px] cursor-pointer">
+                        Prepare PO
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Purchase History -->
+        <div class="glass-card p-5 space-y-3">
+          <h3 class="font-display font-bold text-sm">Recent Raw-Material Purchase History (Demo Records)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            ${appState.purchaseHistory.map(p => `
+              <div class="p-3.5 rounded-xl border space-y-1.5" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <div class="flex justify-between font-mono text-[11px]">
+                  <span class="text-amber-400 font-semibold">${p.id}</span>
+                  <span style="color: var(--text-muted);">${p.date}</span>
+                </div>
+                <p class="font-semibold">${p.item} (${p.qtyKg} kg)</p>
+                <p class="text-[11px]" style="color: var(--text-muted);">${p.supplier}</p>
+                <div class="flex justify-between pt-1 border-t font-mono" style="border-color: var(--border-subtle);">
+                  <span>${formatINR(p.total)} (@ ₹${p.rate}/kg)</span>
+                  <span class="text-emerald-400">${p.status}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function openPurchaseRequestModal(supId) {
+      const sup = appState.suppliers.find(s => s.id === supId);
+      if (!sup) return;
+      openModal('Prepare Purchase Order (Requires Owner Approval)', `
+        <form onsubmit="submitPurchaseOrderDraft(event, '${sup.id}')" class="space-y-3 text-xs">
+          <div class="p-3 rounded-xl border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+            <p class="font-semibold">${sup.name}</p>
+            <p style="color: var(--text-muted);">${sup.spice} &bull; Indicative Rate: ₹${sup.indicativePrice}/kg (MOQ ${sup.moqKg} kg)</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Order Quantity (kg)</label>
+              <input name="qtyKg" type="number" required min="${sup.moqKg}" value="${sup.moqKg}" class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Target Rate (₹/kg)</label>
+              <input name="rate" type="number" required value="${sup.indicativePrice}" class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Quality &amp; Delivery Terms</label>
+            <input name="notes" value="Moisture <10%, Sortex clean, delivery to Panipat Plant within 5 days." class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[11px]">
+            Security Guardrail: Submitting creates a Purchase Order draft in your Approval Queue. No funds are committed until you click Approve.
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Send PO to Approval Queue</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function submitPurchaseOrderDraft(e, supId) {
+      e.preventDefault();
+      const sup = appState.suppliers.find(s => s.id === supId);
+      const fd = new FormData(e.target);
+      const qty = Number(fd.get('qtyKg'));
+      const rate = Number(fd.get('rate'));
+      const total = qty * rate;
+
+      appState.approvals.unshift({
+        id: 'APR-' + Math.floor(100 + Math.random() * 899),
+        type: 'Purchase Order Draft',
+        title: `PO Draft: ${qty} kg ${sup.spice} from ${sup.name.replace(' (Illustrative)', '')}`,
+        amount: formatINR(total),
+        reason: `Rate ₹${rate}/kg. ${fd.get('notes')}`,
+        status: 'Pending',
+        createdAt: 'Just now'
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Purchase Order drafted & queued for Owner Approval!', 'success');
+    }
+
+    function openAddSupplierModal() {
+      openModal('Add Illustrative Supplier Quote', `
+        <form onsubmit="saveNewSupplier(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Supplier Name</label>
+            <input name="name" required placeholder="e.g. Sangli Turmeric Traders (Illustrative)" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Raw Spice</label>
+              <input name="spice" required value="Turmeric Fingers (Rajapuri)" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Location</label>
+              <input name="location" required value="Sangli, Maharashtra" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Indicative ₹/kg</label>
+              <input name="price" type="number" required value="152" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">MOQ (kg)</label>
+              <input name="moq" type="number" required value="500" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Available (kg)</label>
+              <input name="avail" type="number" required value="6000" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Quality Specification</label>
+            <input name="quality" value="4.4% Curcumin • Machine Polished" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Save Supplier</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function saveNewSupplier(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      appState.suppliers.unshift({
+        id: 'SUP-' + Math.floor(10 + Math.random() * 89),
+        name: fd.get('name'),
+        spice: fd.get('spice'),
+        location: fd.get('location'),
+        availableKg: Number(fd.get('avail')),
+        indicativePrice: Number(fd.get('price')),
+        moqKg: Number(fd.get('moq')),
+        quality: fd.get('quality'),
+        rating: 4.7
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Supplier quote added to directory.', 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 5: MANUFACTURING AND INVENTORY
+     *************************************************************************/
+    function renderManufacturing(el) {
+      const stages = [
+        '1. Raw Material Purchase',
+        '2. Received at Plant',
+        '3. Quality Inspection',
+        '4. Cleaning & Destoning',
+        '5. Cryo-Grinding',
+        '6. Masala Blending',
+        '7. Pouch Packaging',
+        '8. Finished Goods Stock',
+        '9. B2B / Retail Sales'
+      ];
+
+      el.innerHTML = `
+        <!-- 9-Stage Production Pipeline -->
+        <div class="glass-card p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-display font-bold text-base">End-to-End Masala Manufacturing Workflow</h2>
+              <p class="text-xs" style="color: var(--text-muted);">Live Batch Tracking &amp; Yield Costing Engine &bull; DEMO DATA</p>
+            </div>
+            <span class="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-400">PLANT UTILIZATION: 74%</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2 pt-1">
+            ${stages.map((st, idx) => `
+              <div class="p-2.5 rounded-xl border text-[11px] font-medium flex flex-col justify-between ${idx === 4 || idx === 6 ? 'border-amber-500/50 bg-amber-500/10 text-amber-300' : ''}"
+                style="${idx !== 4 && idx !== 6 ? 'background-color: var(--bg-elevated); border-color: var(--border-subtle);' : ''}">
+                <span class="font-mono text-[10px] opacity-60">STAGE 0${idx + 1}</span>
+                <span class="mt-1 leading-tight">${st.replace(/^\d+\.\s/, '')}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Batch Costing Simulator & Finished Goods Inventory -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Interactive Production Batch Creator (5 cols) -->
+          <div id="batchCalculatorCard" class="lg:col-span-5 glass-card p-5 space-y-4">
+            <div>
+              <h3 class="font-display font-bold text-sm flex items-center gap-2">
+                <i data-lucide="calculator" class="w-4 h-4 text-amber-400"></i>
+                Production Batch Cost &amp; Yield Calculator
+              </h3>
+              <p class="text-xs mt-0.5" style="color: var(--text-muted);">Simulate grinding wastage, packaging &amp; net cost per kg.</p>
+            </div>
+
+            <form id="batchForm" onsubmit="createProductionBatch(event)" class="space-y-3 text-xs">
+              <div>
+                <label class="block font-medium mb-1">Target Finished Masala Product</label>
+                <select id="batchProduct" onchange="recalcBatchPreview()" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  ${appState.finishedInventory.map(f => `<option value="${f.name}">${f.name}</option>`).join('')}
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-medium mb-1">Select Raw Material Input</label>
+                <select id="batchRaw" onchange="recalcBatchPreview()" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  ${appState.rawInventory.map((r, i) => `<option value="${i}">${r.name} (Avail: ${r.stockKg} kg @ ₹${r.avgCostPerKg}/kg)</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-medium mb-1">Input Quantity (kg)</label>
+                  <input id="batchInputKg" type="number" min="10" max="5000" value="200" oninput="recalcBatchPreview()" required
+                    class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">Grinding Wastage (%)</label>
+                  <input id="batchWastage" type="number" step="0.5" min="0" max="25" value="5" oninput="recalcBatchPreview()" required
+                    class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-medium mb-1">Grinding &amp; Labour Cost (₹)</label>
+                  <input id="batchProcCost" type="number" min="0" value="2800" oninput="recalcBatchPreview()" required
+                    class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">Packaging Pouches Cost (₹)</label>
+                  <input id="batchPackCost" type="number" min="0" value="3200" oninput="recalcBatchPreview()" required
+                    class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+                </div>
+              </div>
+
+              <!-- Live Calculated Summary Box -->
+              <div id="batchLivePreview" class="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-1.5 font-mono text-xs">
+                <!-- Populated via recalcBatchPreview() -->
+              </div>
+
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-xs cursor-pointer">
+                Execute Production Batch &amp; Update Stock
+              </button>
+            </form>
+          </div>
+
+          <!-- Finished Goods Stock & Batch Log (7 cols) -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="glass-card p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="font-display font-bold text-sm">Finished Masala Inventory &amp; Unit Margins</h3>
+                <span class="text-[11px] font-mono text-amber-400">DEMO STOCK</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="border-b text-[11px] font-mono uppercase" style="background-color: var(--bg-elevated); border-color: var(--border-subtle); color: var(--text-muted);">
+                      <th class="p-2.5">Masala SKU</th>
+                      <th class="p-2.5">Stock</th>
+                      <th class="p-2.5">Cost/kg</th>
+                      <th class="p-2.5">Sell/kg</th>
+                      <th class="p-2.5">Gross Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y" style="border-color: var(--border-subtle);">
+                    ${appState.finishedInventory.map(f => {
+                      const isLow = f.stockKg < f.minStockKg;
+                      return `
+                        <tr>
+                          <td class="p-2.5 font-semibold">${f.name}</td>
+                          <td class="p-2.5 font-mono ${isLow ? 'text-red-400 font-bold' : ''}">${f.stockKg} kg ${isLow ? '⚠' : ''}</td>
+                          <td class="p-2.5 font-mono">₹${f.costPerKg}</td>
+                          <td class="p-2.5 font-mono">₹${f.sellingPricePerKg}</td>
+                          <td class="p-2.5 font-mono text-emerald-400 font-semibold">${f.marginPct}%</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Recent Production Batches -->
+            <div class="glass-card p-5 space-y-3">
+              <h3 class="font-display font-bold text-sm">Production Batch Ledger</h3>
+              <div class="space-y-2.5 text-xs">
+                ${appState.batches.map(b => `
+                  <div class="p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-mono font-bold text-amber-400">${b.id}</span>
+                        <span class="font-semibold">${b.product}</span>
+                      </div>
+                      <p class="text-[11px] mt-0.5" style="color: var(--text-muted);">
+                        Input: ${b.inputKg} kg ${b.rawUsed} &bull; Wastage: ${b.wastagePct}% &bull; Net Output: <strong>${b.outputKg} kg</strong>
+                      </p>
+                    </div>
+                    <div class="text-left sm:text-right font-mono">
+                      <div class="font-bold text-emerald-400">₹${b.costPerKg}/kg</div>
+                      <div class="text-[10px]" style="color: var(--text-muted);">Total: ${formatINR(b.totalCost)}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      recalcBatchPreview();
+    }
+
+    function recalcBatchPreview() {
+      const box = document.getElementById('batchLivePreview');
+      if (!box) return;
+      const rawIdx = Number(document.getElementById('batchRaw').value);
+      const raw = appState.rawInventory[rawIdx] || appState.rawInventory[0];
+      const inputKg = Number(document.getElementById('batchInputKg').value) || 0;
+      const wastagePct = Number(document.getElementById('batchWastage').value) || 0;
+      const procCost = Number(document.getElementById('batchProcCost').value) || 0;
+      const packCost = Number(document.getElementById('batchPackCost').value) || 0;
+
+      const rawCost = inputKg * raw.avgCostPerKg;
+      const netOutputKg = Math.max(1, +(inputKg * (1 - wastagePct / 100)).toFixed(1));
+      const totalBatchCost = rawCost + procCost + packCost;
+      const costPerKg = +(totalBatchCost / netOutputKg).toFixed(2);
+
+      box.innerHTML = `
+        <div class="flex justify-between"><span>Raw Material Cost (${inputKg}kg @ ₹${raw.avgCostPerKg}):</span><span>${formatINR(rawCost)}</span></div>
+        <div class="flex justify-between"><span>Net Finished Yield (after ${wastagePct}% loss):</span><span class="text-emerald-400 font-bold">${netOutputKg} kg</span></div>
+        <div class="flex justify-between"><span>Total Batch Cost:</span><span>${formatINR(totalBatchCost)}</span></div>
+        <div class="flex justify-between pt-1.5 border-t border-amber-500/25 text-sm font-bold text-amber-400">
+          <span>Final Landed Cost / kg:</span><span>₹${costPerKg} / kg</span>
+        </div>
+      `;
+    }
+
+    function createProductionBatch(e) {
+      e.preventDefault();
+      const productName = document.getElementById('batchProduct').value;
+      const rawIdx = Number(document.getElementById('batchRaw').value);
+      const raw = appState.rawInventory[rawIdx];
+      const inputKg = Number(document.getElementById('batchInputKg').value);
+      const wastagePct = Number(document.getElementById('batchWastage').value);
+      const procCost = Number(document.getElementById('batchProcCost').value);
+      const packCost = Number(document.getElementById('batchPackCost').value);
+
+      if (inputKg > raw.stockKg) {
+        showToast(`Insufficient ${raw.name} stock (Available: ${raw.stockKg} kg).`, 'warning');
+        return;
+      }
+
+      const netOutputKg = +(inputKg * (1 - wastagePct / 100)).toFixed(1);
+      const totalBatchCost = inputKg * raw.avgCostPerKg + procCost + packCost;
+      const costPerKg = +(totalBatchCost / netOutputKg).toFixed(2);
+
+      // Update Raw & Finished Inventory
+      raw.stockKg = +(raw.stockKg - inputKg).toFixed(1);
+      const finItem = appState.finishedInventory.find(f => f.name === productName);
+      if (finItem) {
+        finItem.stockKg = +(finItem.stockKg + netOutputKg).toFixed(1);
+        finItem.costPerKg = Math.round(costPerKg);
+        finItem.marginPct = +(((finItem.sellingPricePerKg - finItem.costPerKg) / finItem.sellingPricePerKg) * 100).toFixed(1);
+      }
+
+      appState.batches.unshift({
+        id: 'BCH-' + Math.floor(210 + Math.random() * 700),
+        date: new Date().toISOString().slice(0, 10),
+        product: productName,
+        rawUsed: raw.name,
+        inputKg,
+        wastagePct,
+        outputKg: netOutputKg,
+        packagingCost: packCost,
+        processingCost: procCost,
+        totalCost: totalBatchCost,
+        costPerKg,
+        stage: 'Finished Goods Inventory'
+      });
+
+      saveState();
+      renderApp();
+      showToast(`Batch produced! ${netOutputKg} kg of ${productName} added to inventory.`, 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 6: SALES AND CUSTOMER CRM
+     *************************************************************************/
+    function renderCRM(el) {
+      const totalReceivables = appState.customers.reduce((s, c) => s + Number(c.outstanding), 0);
+
+      el.innerHTML = `
+        <div class="glass-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-display font-bold text-base">B2B Customer CRM &amp; Bulk Order Operations</h2>
+            <p class="text-xs" style="color: var(--text-muted);">
+              Outstanding Receivables: <span class="font-mono font-bold text-amber-400">${formatINR(totalReceivables)}</span> &bull; DEMO DATA
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openQuotationModal()" class="px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Generate Quotation
+            </button>
+            <button onclick="openNewOrderModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Bulk Order
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Orders Table -->
+        <div class="glass-card overflow-hidden">
+          <div class="p-4 border-b flex items-center justify-between" style="border-color: var(--border-subtle);">
+            <h3 class="font-display font-bold text-sm">Bulk Orders &amp; Dispatch Pipeline (${appState.orders.length})</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b text-[11px] font-mono uppercase" style="background-color: var(--bg-elevated); border-color: var(--border-subtle); color: var(--text-muted);">
+                  <th class="p-3.5">Order ID</th>
+                  <th class="p-3.5">Customer</th>
+                  <th class="p-3.5">Product &amp; Qty</th>
+                  <th class="p-3.5">Total Value</th>
+                  <th class="p-3.5">Fulfillment</th>
+                  <th class="p-3.5">Payment</th>
+                  <th class="p-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y" style="border-color: var(--border-subtle);">
+                ${appState.orders.map(o => `
+                  <tr class="hover:bg-zinc-500/5">
+                    <td class="p-3.5 font-mono font-semibold text-amber-400">${o.id}</td>
+                    <td class="p-3.5 font-medium">${o.customer}</td>
+                    <td class="p-3.5">${o.product} <span class="font-mono text-[11px]" style="color: var(--text-muted);">(${o.qtyKg} kg @ ₹${o.rate})</span></td>
+                    <td class="p-3.5 font-mono font-bold">${formatINR(o.amount)}</td>
+                    <td class="p-3.5">
+                      <span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${o.status === 'Delivered' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-blue-500/15 text-blue-400'}">${o.status}</span>
+                    </td>
+                    <td class="p-3.5">
+                      <span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${o.payment === 'Paid' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'}">${o.payment}</span>
+                    </td>
+                    <td class="p-3.5 text-right space-x-1">
+                      ${o.status !== 'Delivered' ? `
+                        <button onclick="markOrderDelivered('${o.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white text-[11px] font-medium cursor-pointer">Mark Delivered</button>
+                      ` : ''}
+                      <button onclick="deleteOrder('${o.id}')" class="p-1.5 rounded-lg hover:bg-red-500/15 text-zinc-400 hover:text-red-400 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Customer Profiles Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${appState.customers.map(c => `
+            <div class="glass-card p-4 space-y-2.5 text-xs">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-purple-500/15 text-purple-400">${c.type}</span>
+                  <h4 class="font-display font-bold text-sm mt-1">${c.name}</h4>
+                  <p style="color: var(--text-muted);">${c.city} &bull; ${c.phone}</p>
+                </div>
+                <div class="text-right font-mono">
+                  <div class="text-[10px]" style="color: var(--text-muted);">Lifetime Value</div>
+                  <div class="font-bold text-sm text-emerald-400">${formatINR(c.totalSpent)}</div>
+                </div>
+              </div>
+              <div class="p-2.5 rounded-xl border flex justify-between" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <span>Outstanding Due: <strong class="font-mono ${c.outstanding > 0 ? 'text-amber-400' : 'text-emerald-400'}">${formatINR(c.outstanding)}</strong></span>
+                <span>Next Follow-Up: <strong class="font-mono">${c.followUp}</strong></span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function openNewOrderModal() {
+      openModal('Create Bulk B2B Order (Demo)', `
+        <form onsubmit="saveNewOrder(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Select Customer</label>
+            <select name="customer" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+              ${appState.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Finished Masala Product</label>
+            <select name="product" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+              ${appState.finishedInventory.map(f => `<option value="${f.name}">${f.name} (Std ₹${f.sellingPricePerKg}/kg)</option>`).join('')}
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Quantity (kg)</label>
+              <input name="qtyKg" type="number" required min="10" value="100" class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Agreed Rate (₹/kg)</label>
+              <input name="rate" type="number" required min="50" value="285" class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Record Order</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function saveNewOrder(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const qtyKg = Number(fd.get('qtyKg'));
+      const rate = Number(fd.get('rate'));
+      const amount = qtyKg * rate;
+
+      appState.orders.unshift({
+        id: 'ORD-' + Math.floor(510 + Math.random() * 480),
+        customer: fd.get('customer'),
+        product: fd.get('product'),
+        qtyKg,
+        rate,
+        amount,
+        status: 'Processing',
+        payment: 'Pending',
+        date: new Date().toISOString().slice(0, 10)
+      });
+      appState.finance.monthlyRevenue += amount;
+      saveState();
+      closeModal();
+      renderApp();
+      showToast(`Order recorded (${formatINR(amount)}) & monthly sales updated.`, 'success');
+    }
+
+    function markOrderDelivered(id) {
+      const ord = appState.orders.find(o => o.id === id);
+      if (ord) {
+        ord.status = 'Delivered';
+        ord.payment = 'Paid';
+        saveState();
+        renderApp();
+        showToast(`Order ${id} marked Delivered & Paid.`, 'success');
+      }
+    }
+
+    function deleteOrder(id) {
+      appState.orders = appState.orders.filter(o => o.id !== id);
+      saveState();
+      renderApp();
+      showToast('Order removed.', 'info');
+    }
+
+    function openQuotationModal() {
+      openModal('AI Quotation Generator (Routes to Owner Approval)', `
+        <form onsubmit="submitQuotationApproval(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Prospect / Buyer Name</label>
+            <input name="buyer" required value="Hotel Noor Mahal Palace (Illustrative)" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Product Mix</label>
+              <input name="product" required value="Assorted HoReCa Pack (Chilli, Turmeric, Garam Masala)" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Total Quote Value (₹)</label>
+              <input name="amount" type="number" required value="84500" class="w-full px-3 py-2 rounded-lg border font-mono" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Validity &amp; Credit Terms</label>
+            <input name="terms" value="Valid for 15 days • 15-day credit cycle • Free doorstep delivery in Haryana" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Send Quote to Approval Queue</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function submitQuotationApproval(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      appState.approvals.unshift({
+        id: 'APR-' + Math.floor(100 + Math.random() * 899),
+        type: 'Customer Quotation',
+        title: `Formal Quote: ${fd.get('buyer')} — ${fd.get('product')}`,
+        amount: formatINR(fd.get('amount')),
+        reason: fd.get('terms'),
+        status: 'Pending',
+        createdAt: 'Just now'
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Quotation prepared and placed in Owner Approval Queue!', 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 7: DISTRIBUTOR MANAGEMENT
+     *************************************************************************/
+    function renderDistributors(el) {
+      el.innerHTML = `
+        <div class="glass-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-display font-bold text-base">Regional Distributor &amp; Super-Stockist Network</h2>
+            <p class="text-xs" style="color: var(--text-muted);">Track distributor onboarding, margin slabs &amp; territory coverage &bull; DEMO DATA</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="${googleSearchURL('FMCG spice food distributors wholesalers Haryana Punjab Uttarakhand')}" target="_blank" rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl border border-blue-500/40 bg-blue-500/10 text-blue-400 text-xs font-semibold inline-flex items-center gap-1.5">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i> Discover Distributors on Google
+            </a>
+            <button onclick="openAddDistributorModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Distributor
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${appState.distributors.map(d => `
+            <div class="glass-card p-5 space-y-3 text-xs">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded ${d.status === 'Active Partner' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'}">${d.status}</span>
+                  <h3 class="font-display font-bold text-sm mt-1.5">${d.name}</h3>
+                  <p style="color: var(--text-muted);">${d.city}, ${d.state}</p>
+                </div>
+              </div>
+              <div class="p-3 rounded-xl border space-y-1.5" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <div class="flex justify-between"><span style="color: var(--text-muted);">Proposed Margin:</span><span class="font-semibold text-amber-400">${d.marginOffered}</span></div>
+                <div class="flex justify-between"><span style="color: var(--text-muted);">Est. Volume:</span><span class="font-mono font-semibold">${d.monthlyVolumeKg} kg/mo</span></div>
+                <div class="flex justify-between"><span style="color: var(--text-muted);">Performance:</span><span class="text-emerald-400 font-medium">${d.performance}</span></div>
+              </div>
+              <p style="color: var(--text-secondary);">${d.notes}</p>
+              <div class="pt-2 border-t flex items-center justify-between" style="border-color: var(--border-subtle); color: var(--text-muted);">
+                <span>${d.contact}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function openAddDistributorModal() {
+      openModal('Add Potential Distributor (Demo)', `
+        <form onsubmit="saveDistributor(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Agency / Distributor Name</label>
+            <input name="name" required placeholder="e.g. Jindal Agro Agencies (Illustrative)" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">City</label>
+              <input name="city" required value="Karnal" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">State</label>
+              <input name="state" required value="Haryana" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Proposed Pricing / Margin</label>
+              <input name="margin" value="14% + 2% Slab" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Est. Monthly Volume (kg)</label>
+              <input name="vol" type="number" value="1000" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Notes</label>
+            <input name="notes" value="Covers 80 retail stores in Karnal district." class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Save Distributor</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function saveDistributor(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      appState.distributors.unshift({
+        id: 'DIST-' + Math.floor(10 + Math.random() * 89),
+        name: fd.get('name'),
+        city: fd.get('city'),
+        state: fd.get('state'),
+        contact: 'Distributor Desk • Demo',
+        status: 'Enquiry',
+        marginOffered: fd.get('margin'),
+        monthlyVolumeKg: Number(fd.get('vol')),
+        performance: 'New Lead',
+        notes: fd.get('notes')
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Distributor added to network.', 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 8: FINANCE AND PROFITABILITY
+     *************************************************************************/
+    function renderFinance(el) {
+      const f = appState.finance;
+      const m = getFinanceMetrics();
+
+      el.innerHTML = `
+        <!-- Top P&L KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          ${kpiCard('Monthly Sales Revenue', formatINR(f.monthlyRevenue), '100% Top-line (Demo)', 'trending-up', 'text-amber-400')}
+          ${kpiCard('Gross Profit', formatINR(m.grossProfit), `${m.grossMarginPct}% Gross Margin`, 'layers', 'text-blue-400')}
+          ${kpiCard('Estimated Net Profit', formatINR(m.netProfit), `${m.netMarginPct}% Net Margin`, 'indian-rupee', m.netProfit >= 0 ? 'text-emerald-400' : 'text-red-400')}
+          ${kpiCard('Est. Break-Even Sales', formatINR(m.breakEvenRevenue), `Safety Margin: ${formatINR(f.monthlyRevenue - m.breakEvenRevenue)}`, 'target', 'text-purple-400')}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Interactive Expense & Revenue Simulator (5 cols) -->
+          <div class="lg:col-span-5 glass-card p-5 space-y-4">
+            <div>
+              <h3 class="font-display font-bold text-sm">Interactive P&amp;L &amp; Expense Simulator</h3>
+              <p class="text-xs mt-0.5" style="color: var(--text-muted);">Adjust any cost head below to test profit margin &amp; break-even sensitivity in real time.</p>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              ${financeInputRow('Sales Revenue (₹)', 'monthlyRevenue', f.monthlyRevenue)}
+              ${financeInputRow('Raw Material Purchases (₹)', 'rawMaterialExpense', f.rawMaterialExpense)}
+              ${financeInputRow('Factory & Packing Labour (₹)', 'labourExpense', f.labourExpense)}
+              ${financeInputRow('Electricity & Grinding Ops (₹)', 'electricityProductionExpense', f.electricityProductionExpense)}
+              ${financeInputRow('Pouches, Cartons & Packaging (₹)', 'packagingExpense', f.packagingExpense)}
+              ${financeInputRow('Freight & Transportation (₹)', 'transportationExpense', f.transportationExpense)}
+              ${financeInputRow('Marketing & Samples (₹)', 'marketingExpense', f.marketingExpense)}
+              ${financeInputRow('Other Operating Overheads (₹)', 'otherOperatingExpense', f.otherOperatingExpense)}
+            </div>
+            <div class="p-3 rounded-xl border text-[11px] leading-relaxed" style="background-color: var(--bg-elevated); border-color: var(--border-subtle); color: var(--text-muted);">
+              <strong>Formula Assumptions (Demo):</strong> Gross Profit = Sales − (Raw Material + Packaging + Production Power). Break-Even Revenue = Fixed Overheads (Labour + Marketing + Admin + ₹35k facility fixed) ÷ Contribution Margin Ratio.
+            </div>
+          </div>
+
+          <!-- Expense Breakdown Chart & Product Profitability (7 cols) -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="glass-card p-5">
+              <h3 class="font-display font-bold text-sm mb-3">Where Every Rupee Goes — Expense Structure</h3>
+              <div class="h-64">
+                <canvas id="financeExpenseChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-card p-5 space-y-3">
+              <h3 class="font-display font-bold text-sm">Product-Wise Unit Profitability</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="border-b text-[11px] font-mono uppercase" style="background-color: var(--bg-elevated); border-color: var(--border-subtle); color: var(--text-muted);">
+                      <th class="p-2.5">Product</th>
+                      <th class="p-2.5">Cost/kg</th>
+                      <th class="p-2.5">Sell/kg</th>
+                      <th class="p-2.5">Profit/kg</th>
+                      <th class="p-2.5">Margin %</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y" style="border-color: var(--border-subtle);">
+                    ${appState.finishedInventory.map(p => `
+                      <tr>
+                        <td class="p-2.5 font-semibold">${p.name}</td>
+                        <td class="p-2.5 font-mono">₹${p.costPerKg}</td>
+                        <td class="p-2.5 font-mono">₹${p.sellingPricePerKg}</td>
+                        <td class="p-2.5 font-mono text-emerald-400">+₹${p.sellingPricePerKg - p.costPerKg}</td>
+                        <td class="p-2.5 font-mono font-bold">${p.marginPct}%</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      initFinanceChart();
+    }
+
+    function financeInputRow(label, key, val) {
+      return `
+        <div class="flex items-center justify-between gap-3">
+          <label class="font-medium" style="color: var(--text-secondary);">${label}</label>
+          <input type="number" step="1000" value="${val}" onchange="updateFinanceField('${key}', this.value)"
+            class="w-36 px-3 py-1.5 rounded-lg border font-mono text-right focus:outline-none focus:border-amber-500"
+            style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+        </div>
+      `;
+    }
+
+    function updateFinanceField(key, val) {
+      appState.finance[key] = Math.max(0, Number(val) || 0);
+      saveState();
+      renderApp();
+    }
+
+    function initFinanceChart() {
+      const ctx = document.getElementById('financeExpenseChart');
+      if (!ctx) return;
+      const f = appState.finance;
+      const m = getFinanceMetrics();
+      const isDark = appState.theme === 'dark';
+      const textColor = isDark ? '#a1a1aa' : '#475569';
+
+      activeCharts.push(new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Raw Mat.', 'Labour', 'Packaging', 'Power/Grind', 'Transport', 'Other Ops', 'Marketing', 'Net Profit'],
+          datasets: [{
+            label: 'Monthly Amount (₹)',
+            data: [
+              f.rawMaterialExpense,
+              f.labourExpense,
+              f.packagingExpense,
+              f.electricityProductionExpense,
+              f.transportationExpense,
+              f.otherOperatingExpense,
+              f.marketingExpense,
+              Math.max(0, m.netProfit)
+            ],
+            backgroundColor: ['#f59e0b', '#6366f1', '#3b82f6', '#ec4899', '#8b5cf6', '#64748b', '#06b6d4', '#10b981'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false } },
+            y: {
+              ticks: { color: textColor, font: { size: 11 }, callback: v => '₹' + (v / 1000) + 'k' },
+              grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)' }
+            }
+          }
+        }
+      }));
+    }
+
+    /*************************************************************************
+     * MODULE 9: MARKETING MANAGER
+     *************************************************************************/
+    function renderMarketing(el) {
+      el.innerHTML = `
+        <div class="glass-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-display font-bold text-base">Brand Growth &amp; Content Studio</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400">MANUAL PUBLISHING ONLY</span>
+            </div>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+              AI drafts Instagram Reels, purity education posts &amp; HoReCa campaigns. External ads require owner approval and manual posting.
+            </p>
+          </div>
+          <button onclick="openCaptionSimulatorModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Generate Post / Reel Idea
+          </button>
+        </div>
+
+        <!-- Content Calendar Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${appState.marketingPosts.map(post => `
+            <div class="glass-card p-4 flex flex-col justify-between space-y-3 text-xs">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="px-2 py-0.5 rounded bg-pink-500/15 text-pink-400 font-semibold text-[11px]">${post.platform}</span>
+                  <span class="font-mono text-[11px]" style="color: var(--text-muted);">${post.date}</span>
+                </div>
+                <h3 class="font-display font-bold text-sm">${post.title}</h3>
+                <div class="p-3 rounded-xl border text-[11px] leading-relaxed" style="background-color: var(--bg-elevated); border-color: var(--border-subtle); color: var(--text-secondary);">
+                  ${post.caption}
+                </div>
+              </div>
+              <div class="pt-2 border-t flex items-center justify-between" style="border-color: var(--border-subtle);">
+                <span class="text-[11px] font-mono text-amber-400">${post.status}</span>
+                <button onclick="queueCampaignApproval('${post.id}')" class="px-2.5 py-1 rounded-lg border hover:border-amber-500/50 text-[11px] font-medium cursor-pointer" style="border-color: var(--border-subtle);">
+                  Send to Approval
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Growth Playbooks -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="glass-card p-4 space-y-1.5">
+            <h4 class="font-display font-bold text-sm text-amber-400">1. Chef Sample Box Funnel</h4>
+            <p style="color: var(--text-secondary);">Send 4x 250g HoReCa pouches (Chilli, Turmeric, Coriander, Shahi Garam Masala) to 30 banquet chefs in Haryana. Avg conversion: 28%.</p>
+          </div>
+          <div class="glass-card p-4 space-y-1.5">
+            <h4 class="font-display font-bold text-sm text-emerald-400">2. Kirana Display Counter Scheme</h4>
+            <p style="color: var(--text-secondary);">Provide acrylic Rajgiri spice dispensers free to retail stores ordering ₹15,000+ opening stock.</p>
+          </div>
+          <div class="glass-card p-4 space-y-1.5">
+            <h4 class="font-display font-bold text-sm text-blue-400">3. Purity Transparency Reels</h4>
+            <p style="color: var(--text-secondary);">Short 20-second factory videos showing stone-free cleaning &amp; lab curcumin testing build instant household trust.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function openCaptionSimulatorModal() {
+      openModal('Simulated AI Content & Reel Generator', `
+        <form onsubmit="saveGeneratedPost(event)" class="space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Format</label>
+              <select name="platform" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <option>Instagram Reel</option><option>Instagram Carousel</option><option>LinkedIn B2B Post</option><option>WhatsApp Broadcast Draft</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Target Date</label>
+              <input name="date" type="date" value="2026-11-22" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Focus Spice / Campaign Theme</label>
+            <input name="title" required value="Shahi Garam Masala: 14 Whole Spices Roasted to Perfection" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Simulated AI Caption</label>
+            <textarea name="caption" rows="3" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">Just a pinch transforms everyday sabzi into a royal feast. Crafted from 14 hand-sorted whole spices in Panipat. Available in 100g retail & 5kg HoReCa packs. #RajgiriSpices #GaramMasala #IndianKitchen</textarea>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Add to Content Planner</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function saveGeneratedPost(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      appState.marketingPosts.unshift({
+        id: 'MKT-' + Math.floor(10 + Math.random() * 89),
+        date: fd.get('date'),
+        platform: fd.get('platform'),
+        title: fd.get('title'),
+        status: 'Draft Ready',
+        caption: fd.get('caption')
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Content draft added to Marketing Calendar.', 'success');
+    }
+
+    function queueCampaignApproval(postId) {
+      const post = appState.marketingPosts.find(p => p.id === postId);
+      if (!post) return;
+      appState.approvals.unshift({
+        id: 'APR-' + Math.floor(100 + Math.random() * 899),
+        type: 'Marketing Campaign',
+        title: `Publish Campaign: ${post.title} (${post.platform})`,
+        amount: '₹5,000 Est. Boost',
+        reason: 'Requires explicit owner sign-off prior to external ad spend or publishing.',
+        status: 'Pending',
+        createdAt: 'Just now'
+      });
+      saveState();
+      showToast('Campaign queued for Owner Approval.', 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 10: BUSINESS OPPORTUNITY FINDER
+     *************************************************************************/
+    function renderOpportunities(el) {
+      el.innerHTML = `
+        <div class="glass-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-display font-bold text-base">AI Growth &amp; New Market Opportunity Radar</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-400">REVENUE ESTIMATES ILLUSTRATIVE</span>
+            </div>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+              High-margin commercial avenues ranked by Opportunity Score, plant capacity fit &amp; demand velocity.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          ${appState.opportunities.map(opp => `
+            <div class="glass-card p-5 flex flex-col justify-between space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-semibold">${opp.category}</span>
+                    <h3 class="font-display font-bold text-base mt-1.5">${opp.title}</h3>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="text-[10px] font-mono uppercase" style="color: var(--text-muted);">Score</div>
+                    <div class="font-mono font-bold text-lg text-emerald-400">${opp.score}/100</div>
+                  </div>
+                </div>
+
+                <div class="p-3 rounded-xl border flex items-center justify-between text-xs" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  <div>
+                    <span style="color: var(--text-muted);">Est. Monthly Potential:</span>
+                    <span class="font-mono font-bold text-amber-400 ml-1">${formatINR(opp.estimatedMonthlyRevenue)}/mo</span>
+                    <span class="text-[10px] ml-1" style="color: var(--text-muted);">(Estimate)</span>
+                  </div>
+                  <span class="text-[11px] font-medium">Effort: ${opp.effort}</span>
+                </div>
+
+                <div class="text-xs space-y-1">
+                  <div class="font-semibold" style="color: var(--text-secondary);">Recommended Execution Steps:</div>
+                  <p class="leading-relaxed whitespace-pre-line" style="color: var(--text-muted);">${opp.steps}</p>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t flex justify-end" style="border-color: var(--border-subtle);">
+                <button onclick="convertOppToTask('${opp.id}')" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Convert to Action Task
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function convertOppToTask(oppId) {
+      const opp = appState.opportunities.find(o => o.id === oppId);
+      if (!opp) return;
+      appState.tasks.unshift({
+        id: 'TSK-' + Math.floor(100 + Math.random() * 899),
+        title: `Execute Opportunity: ${opp.title}`,
+        priority: 'High',
+        deadline: '2026-11-20',
+        completed: false,
+        source: 'Opportunity Finder'
+      });
+      saveState();
+      showToast(`Action task created for "${opp.title}"!`, 'success');
+    }
+
+    /*************************************************************************
+     * MODULE 11: TASK & AUTOMATION CENTRE + OWNER APPROVAL SECURITY VAULT
+     *************************************************************************/
+    function renderTasksAndApprovals(el) {
+      el.innerHTML = `
+        <!-- Security Guardrail Banner -->
+        <div class="glass-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="space-y-1">
+            <h2 class="font-display font-bold text-base flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+              Owner Approval Vault &amp; Autonomous Guardrails
+            </h2>
+            <p class="text-xs" style="color: var(--text-secondary);">
+              Rajgiri AI prepares Purchase Orders, Quotations, Supplier Enquiries &amp; Campaigns — <strong>zero external messages, orders, or payments execute without your explicit approval.</strong>
+            </p>
+          </div>
+          <button onclick="openNewTaskModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Create Task
+          </button>
+        </div>
+
+        <!-- Owner Approval Queue -->
+        <div class="glass-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display font-bold text-sm">Pending &amp; Reviewed Owner Approvals (${appState.approvals.length})</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${appState.approvals.map(a => `
+              <div class="p-4 rounded-xl border flex flex-col justify-between space-y-3 text-xs" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-semibold">${a.type}</span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded ${
+                      a.status === 'Pending' ? 'bg-blue-500/15 text-blue-400' :
+                      a.status === 'Approved' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+                    }">${a.status}</span>
+                  </div>
+                  <h4 class="font-display font-bold text-sm">${a.title}</h4>
+                  <div class="font-mono font-bold text-amber-400">${a.amount}</div>
+                  <p style="color: var(--text-secondary);">${a.reason}</p>
+                </div>
+                <div class="pt-2 border-t flex items-center justify-between gap-2" style="border-color: var(--border-subtle);">
+                  <span class="text-[10px]" style="color: var(--text-muted);">${a.createdAt}</span>
+                  ${a.status === 'Pending' ? `
+                    <div class="flex gap-1.5">
+                      <button onclick="decideApproval('${a.id}', 'Approved')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold cursor-pointer">Approve</button>
+                      <button onclick="decideApproval('${a.id}', 'Rejected')" class="px-3 py-1.5 rounded-lg border hover:bg-red-500/15 hover:text-red-400 cursor-pointer" style="border-color: var(--border-subtle);">Reject</button>
+                    </div>
+                  ` : `<span class="text-[11px] font-semibold">${a.status} by Owner</span>`}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Tasks & Simulated Automations -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Task Checklist (7 cols) -->
+          <div class="lg:col-span-7 glass-card p-5 space-y-3">
+            <h3 class="font-display font-bold text-sm">Owner &amp; AI Action Checklist</h3>
+            <div class="space-y-2 text-xs">
+              ${appState.tasks.map(t => `
+                <div class="p-3 rounded-xl border flex items-center justify-between gap-3" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  <label class="flex items-start gap-2.5 cursor-pointer flex-1">
+                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('${t.id}')" class="mt-0.5 accent-amber-500 cursor-pointer" />
+                    <div>
+                      <p class="font-medium ${t.completed ? 'line-through opacity-50' : ''}">${t.title}</p>
+                      <div class="flex items-center gap-2 mt-1 text-[10px]" style="color: var(--text-muted);">
+                        <span class="px-1.5 py-0.2 rounded ${t.priority === 'High' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'}">${t.priority}</span>
+                        <span>Due: ${t.deadline}</span>
+                        <span>&bull; ${t.source}</span>
+                      </div>
+                    </div>
+                  </label>
+                  <button onclick="deleteTask('${t.id}')" class="p-1.5 rounded hover:bg-red-500/15 text-zinc-400 hover:text-red-400 cursor-pointer"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Simulated Automations (5 cols) -->
+          <div class="lg:col-span-5 glass-card p-5 space-y-3">
+            <h3 class="font-display font-bold text-sm">Simulated Background Workflows</h3>
+            <div class="space-y-2.5 text-xs">
+              ${appState.automations.map(aut => `
+                <div class="p-3 rounded-xl border space-y-2" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                  <div class="flex items-center justify-between">
+                    <span class="font-semibold">${aut.name}</span>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">ACTIVE</span>
+                  </div>
+                  <p class="text-[11px]" style="color: var(--text-muted);">${aut.desc}</p>
+                  <div class="flex items-center justify-between pt-1">
+                    <span class="text-[10px] font-mono" style="color: var(--text-muted);">Last run: ${aut.lastRun}</span>
+                    <button onclick="runSimulatedAutomation('${aut.id}')" class="px-2.5 py-1 rounded-lg border hover:border-amber-500/50 text-[11px] font-medium cursor-pointer" style="border-color: var(--border-subtle);">
+                      Run Simulation
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function decideApproval(id, decision) {
+      const item = appState.approvals.find(a => a.id === id);
+      if (!item) return;
+      item.status = decision;
+      saveState();
+      renderApp();
+      showToast(`${item.type} marked as ${decision}.`, decision === 'Approved' ? 'success' : 'info');
+    }
+
+    function toggleTask(id) {
+      const t = appState.tasks.find(x => x.id === id);
+      if (t) {
+        t.completed = !t.completed;
+        saveState();
+        renderApp();
+      }
+    }
+
+    function deleteTask(id) {
+      appState.tasks = appState.tasks.filter(x => x.id !== id);
+      saveState();
+      renderApp();
+    }
+
+    function openNewTaskModal() {
+      openModal('Create Business Task', `
+        <form onsubmit="saveNewTask(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Task Description</label>
+            <input name="title" required placeholder="e.g. Negotiate freight contract for Delhi NCR dispatches" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-1">Priority</label>
+              <select name="priority" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);">
+                <option>High</option><option>Medium</option><option>Low</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Deadline</label>
+              <input name="deadline" type="date" value="2026-11-16" class="w-full px-3 py-2 rounded-lg border" style="background-color: var(--bg-elevated); border-color: var(--border-subtle);" />
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border cursor-pointer" style="border-color: var(--border-subtle);">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold cursor-pointer">Add Task</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function saveNewTask(e) {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      appState.tasks.unshift({
+        id: 'TSK-' + Math.floor(100 + Math.random() * 899),
+        title: fd.get('title'),
+        priority: fd.get('priority'),
+        deadline: fd.get('deadline'),
+        completed: false,
+        source: 'Owner Created'
+      });
+      saveState();
+      closeModal();
+      renderApp();
+      showToast('Task added.', 'success');
+    }
+
+    function runSimulatedAutomation(autId) {
+      const aut = appState.automations.find(a => a.id === autId);
+      if (!aut) return;
+      aut.lastRun = 'Just now (Simulated)';
+      saveState();
+      renderApp();
+      showToast(`Simulated "${aut.name}" completed — checks logged.`, 'success');
+    }
+
+    /*************************************************************************
+     * 10-STEP GUIDED BUSINESS DEMONSTRATION EXPERIENCE
+     *************************************************************************/
+    const DEMO_STEPS = [
+      { tab: 'leads', title: '1. AI Identifies Hotel & Restaurant Buyers', desc: 'Rajgiri AI scans regional hotels, dhabas & caterers in Haryana with high monthly spice demand and scores them by conversion potential.' },
+      { tab: 'suppliers', title: '2. AI Discovers Raw-Material Suppliers', desc: 'Next, your AI Manager tracks wholesale mandi suppliers for Red Chilli, Turmeric, Coriander & Cumin across Guntur, Nizamabad, Kota & Unjha.' },
+      { tab: 'suppliers', title: '3. Owner Compares Suppliers & Quality', desc: 'Compare indicative rates, MOQ, curcumin/ASTA color specs side by side, or verify live mandi prices via Google search links.' },
+      { tab: 'tasks', title: '4. Owner Prepares & Approves Purchase Request', desc: 'AI drafts Purchase Orders when raw stock dips, but holds them in the Owner Approval Vault so zero money is spent without your sign-off.' },
+      { tab: 'manufacturing', title: '5. Raw Materials Enter 9-Stage Production', desc: 'Approved raw spices move from inspection & cleaning through cryo-grinding, blending & pouch packaging.' },
+      { tab: 'manufacturing', title: '6. AI Calculates Manufacturing & Wastage Costs', desc: 'Use the Batch Cost Calculator to factor grinding wastage %, labour/power & packaging into exact landed cost per kg.' },
+      { tab: 'manufacturing', title: '7. Finished Masalas Enter Inventory', desc: 'Completed batches automatically update finished SKU stock levels and recalculate unit gross margins.' },
+      { tab: 'opportunities', title: '8. AI Identifies New Bulk & Private-Label Buyers', desc: 'The Opportunity Finder uncovers high-margin wedding caterer packs, highway HoReCa contracts & supermarket private-label deals.' },
+      { tab: 'crm', title: '9. Owner Prepares Bulk Quotations', desc: 'Generate tailored HoReCa & wholesale quotations in the CRM—routed to your Approval Queue before external dispatch.' },
+      { tab: 'dashboard', title: '10. Executive Dashboard Displays Business Performance', desc: 'Monitor sales, expenses, net profit, inventory health & daily AI recommendations in one unified command center.' }
+    ];
+
+    function startGuidedDemo() {
+      demoTourIndex = 0;
+      document.getElementById('guidedDemoBar').classList.remove('hidden');
+      applyDemoStep();
+    }
+
+    function nextDemoStep() {
+      if (demoTourIndex < DEMO_STEPS.length - 1) {
+        demoTourIndex++;
+        applyDemoStep();
+      } else {
+        endGuidedDemo();
+        showToast('Guided Business Demo completed! Explore any module freely.', 'success');
+      }
+    }
+
+    function prevDemoStep() {
+      if (demoTourIndex > 0) {
+        demoTourIndex--;
+        applyDemoStep();
+      }
+    }
+
+    function endGuidedDemo() {
+      demoTourIndex = -1;
+      document.getElementById('guidedDemoBar').classList.add('hidden');
+    }
+
+    function applyDemoStep() {
+      const step = DEMO_STEPS[demoTourIndex];
+      if (!step) return;
+      document.getElementById('demoStepBadge').textContent = `STEP ${demoTourIndex + 1} OF ${DEMO_STEPS.length}`;
+      document.getElementById('demoStepTitle').textContent = step.title;
+      document.getElementById('demoStepDesc').textContent = step.desc;
+      document.getElementById('demoProgressBar').style.width = `${((demoTourIndex + 1) / DEMO_STEPS.length) * 100}%`;
+      document.getElementById('demoPrevBtn').disabled = demoTourIndex === 0;
+      document.getElementById('demoNextBtn').textContent = demoTourIndex === DEMO_STEPS.length - 1 ? 'Finish Tour ✓' : 'Next Step →';
+
+      navigateTo(step.tab);
+    }
+
+    /*************************************************************************
+     * INITIALIZE APPLICATION ON LOAD
+     *************************************************************************/
+    window.addEventListener('DOMContentLoaded', () => {
+      renderApp();
+    });
+  </script>
+</body>
+</html>
